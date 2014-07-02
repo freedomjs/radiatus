@@ -1,0 +1,23 @@
+{
+  "name": "radiatus",
+  "version": "0.0.0",
+  "description": "Node Web Server for freedom.js apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/freedomjs/radiatus.git"
+  },
+  "author": "Will Scott <willscott@gmail.com> (https://wills.co.tt/)",
+  "license": "Apache2",
+  "bugs": {
+    "url": "https://github.com/freedomjs/radiatus/issues"
+  },
+  "homepage": "https://github.com/freedomjs/radiatus",
+  "dependencies": {
+    "freedom": "^0.5.0",
+    "nomnom": "^1.8.0"
+  }
+}
