@@ -1,4 +1,5 @@
 var http = require('http');
+var freedom = require('freedom');
 var opts = require('nomnom')
   .option('debug', {
     abbr: 'd',
@@ -18,7 +19,8 @@ var opts = require('nomnom')
   })
   .parse();
 
-var manifest = opts.path;
+var manifest = JSON.parse(require('fs').readFileSync(opts.path));
+
 var server = http.createServer(function(request, response) {
   
 });
