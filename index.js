@@ -34,6 +34,10 @@ index = fs.readFileSync(path.resolve(path.dirname(opts.path), index));
 
 var server = http.createServer(function(request, response) {
   if(request.url=='/index.html' || request.url=='/') {
+    response.writeHead(200, {
+      'Content-Length': index.length,
+      'Context-Type': 'text/html'
+    });
     response.end(index);
     return;
   }
