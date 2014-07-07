@@ -17,7 +17,11 @@
   },
   "homepage": "https://github.com/freedomjs/radiatus",
   "dependencies": {
+    "cookies": "^0.4.1",
+    "es5-shim": "^3.4.0",
+    "es6-promise": "^1.0.0",
     "freedom": "^0.5.0",
+    "keygrip": "^1.0.1",
     "nomnom": "^1.8.0"
   }
 }
