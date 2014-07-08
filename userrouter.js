@@ -32,3 +32,8 @@ exports.getInstance = function(request, response) {
     cookies.set()
   }
 };
+
+exports.route = function(req, res) {
+  console.log('got request for ', req.params[0])
+  res.end('whoo!');
+};

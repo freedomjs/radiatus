@@ -1,7 +1,7 @@
 var http = require('http');
 var freedom = require('freedom');
-var fs = require('fs');
-var path = require('path');
+var express = require('express');
+
 var opts = require('nomnom')
   .option('debug', {
     abbr: 'd',
@@ -20,10 +20,22 @@ var opts = require('nomnom')
     required: true
   })
   .parse();
+
 var userRouter = require('./userrouter');
 
+var fileServer = require('./fileServer').serve(opts.path);
+
+var app = express();
+app.all('/freedom/*', userRouter.route);
+app.get('*', fileServer.route.bind(fileServer));
+
+app.listen(opts.port);
+console.log("Radiatus is running on port " + opts.port);
+
+/*
 var manifest = JSON.parse(require('fs').readFileSync(opts.path)),
     index;
+
 if (manifest.app && manifest.app.index) {
   index = manifest.app.index;
 } else {
@@ -33,7 +45,8 @@ if (manifest.app && manifest.app.index) {
 index = fs.readFileSync(path.resolve(path.dirname(opts.path), index));
 
 var server = http.createServer(function(request, response) {
-  if(request.url=='/index.html' || request.url=='/') {
+  // Index page.
+  if (request.url == '/index.html' || request.url == '/') {
     response.writeHead(200, {
       'Content-Length': index.length,
       'Context-Type': 'text/html'
@@ -41,6 +54,29 @@ var server = http.createServer(function(request, response) {
     response.end(index);
     return;
   }
+  // Static Content.
+  else if (manifest.app.static &&
+      manifest.app.static.indexOf(request.url.substr(1)) > -1) {
+    return;
+  }
+
+  // freedom.js
+  else if (request.url == '/freedom.js') {
+    fs.readFile('node_modules/freedom/freedom.js', "binary", function(err, file) {
+      response.writeHead(200, {
+        'Content-Length': file.length,
+        'Content-Type': 'text/javascript'
+      });
+      response.write(file, "binary");
+      response.end();
+    });
+    return;
+  }
+
+  // Otherwise...
+  response.writeHead(404);
+  response.end();
+  return;
 
   if (userRouter.sessionExists(request, response)) {
     
@@ -48,6 +84,4 @@ var server = http.createServer(function(request, response) {
     
   }
 });
-
-server.listen(opts.port);
-console.log("Radiatus is running on port " + opts.port);
+*/
