@@ -64,7 +64,6 @@ fileServer.prototype.route = function(req, response) {
     fs.readFile(this.files[req.params[0]], {encoding: "binary"}, function(err, file) {
       if (err) {
         response.writeHead(404);
-        console.warn(err);
         return response.end(err.code);
       }
       response.writeHead(200, {

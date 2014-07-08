@@ -1,6 +1,7 @@
 var http = require('http');
 var freedom = require('freedom');
 var express = require('express');
+var morgan  = require('morgan')
 
 var opts = require('nomnom')
   .option('debug', {
@@ -26,6 +27,8 @@ var userRouter = require('./userrouter');
 var fileServer = require('./fileServer').serve(opts.path);
 
 var app = express();
+app.use(morgan('dev'));
+
 app.all('/freedom/*', userRouter.route);
 app.get('/freedom.js', function(req, res) {
   res.end(require('fs').readFileSync('node_modules/freedom/freedom.js'));
