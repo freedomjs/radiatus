@@ -24,7 +24,7 @@ var opts = require('nomnom')
 
 var userRouter = require('./userrouter');
 
-var fileServer = require('./fileServer').serve(opts.path);
+var fileServer = require('./fileserver').serve(opts.path);
 
 var app = express();
 app.use(morgan('dev'));
