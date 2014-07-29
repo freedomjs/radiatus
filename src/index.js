@@ -2,10 +2,12 @@
  * Radiatus Entry
  **/
 var path = require('path');
-var http = require('http');
 var freedom = require('freedom');
 var express = require('express');
 var morgan  = require('morgan')
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
@@ -32,7 +34,6 @@ var userRouter = require('./userrouter');
 var fileServer = require('./fileserver').serve(opts.path, opts.debug);
 
 /** SETUP ROUTES **/
-var app = express();
 // View engine setup (only for errors right now)
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
@@ -55,7 +56,14 @@ app.get('/freedom.js', function(req, res) {
 });
 **/
 
+io.on('connection', function(socket) {
+  console.log('a user connected');
+  socket.on('disconnect', function() {
+    console.log('user disconnected');
+  });
+});
 
 /** START 'ER UP**/
-app.listen(opts.port);
-console.log("Radiatus is running on port " + opts.port);
+http.listen(opts.port, function() {
+  console.log("Radiatus is running on port " + opts.port);
+});
