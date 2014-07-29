@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "localstorage": {
-      "url": "../../node_modules/freedom/providers/storage/isolated/storage.isolated.json",
+      "url": "../../node_modules/freedom/providers/storage/shared/storage.shared.json",
       "api": "storage"
     }
   }

@@ -11,9 +11,19 @@ ProcessManager.prototype.onConnection = function(name, socket) {
   this.sockets[name] = socket;
   this.fContexts[name] = fContext;
   
-  fContext.on('*', function(socket, data) {
+  fContext.on('stats', function(socket, data) {
     console.log(data);
-    
+    socket.emit('message', {
+      label: 'stats',
+      data: data
+    });
+  }.bind(this, socket));
+  fContext.on('board', function(socket, data) {
+    console.log(data);
+    socket.emit('message', {
+      label: 'board',
+      data: data
+    });
   }.bind(this, socket));
 
   socket.on('message', function(fContext, msg) {
