@@ -4,7 +4,11 @@
 var path = require('path');
 var freedom = require('freedom');
 var express = require('express');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 var morgan  = require('morgan')
+
+/** APPLICATION **/
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -30,10 +34,12 @@ var opts = require('nomnom')
   .parse();
 
 /** SUBMODULES **/
-var userRouter = require('./userrouter');
+//var userRouter = require('./userrouter');
 var fileServer = require('./fileserver').serve(opts.path, opts.debug);
+var ProcessManager = require('./processmanager').ProcessManager;
+var processManager = new ProcessManager();
 
-/** SETUP ROUTES **/
+/** MIDDLEWARE **/
 // View engine setup (only for errors right now)
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
@@ -43,25 +49,29 @@ if (opts.debug) {
 } else {
   app.use(morgan('common'));
 }
+// Setup sessions
+app.use(cookieParser());
+app.use(session({
+  secret: 'secret',
+  name: 'session',
+  resave: true,
+  saveUninitialized: true
+}));
+
+/** ROUTES **/
+// socket.io endpoint
+io.on('connection', processManager.onConnection.bind(processManager, 'user'));
 // This serves static files from 'src/client/' (includes freedom.js)
 app.use('/freedom.js', express.static(path.join(__dirname, 'client/freedom.js')));
-// socket.io endpoint
-app.all('/freedom/*', userRouter.route);
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.get('*', fileServer.route.bind(fileServer));
 /**
+app.all('/freedom/*', userRouter.route);
 app.get('/freedom.js', function(req, res) {
   res.end(require('fs').readFileSync('./src/client/freedom.js'));
 });
 **/
-
-io.on('connection', function(socket) {
-  console.log('a user connected');
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
-  });
-});
 
 /** START 'ER UP**/
 http.listen(opts.port, function() {
