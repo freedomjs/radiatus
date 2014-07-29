@@ -9,10 +9,16 @@ var mime = require('mime');
 var express = require('express');
 var router = express.Router();
 
-var FileServer = function() {
+var FileServer = function(dbg) {
   this.files = {};
   this.manifests = {};
   this.index = null;
+  this.debug = null;
+  if (typeof dbg == 'undefined') {
+    this.debug = false;
+  } else {
+    this.debug = dbg;
+  }
 };
 
 FileServer.prototype.serveModule = function(prefix, url) {
@@ -59,7 +65,7 @@ FileServer.prototype.serveModule = function(prefix, url) {
 };
 
 // Handle web requests against known files.
-FileServer.prototype.route = function(req, response) {
+FileServer.prototype.route = function(req, res, next) {
   // Remove leading '/'
   if (req.url.length && req.url[0] == '/') {
     req.url = req.url.substr(1);
@@ -69,39 +75,57 @@ FileServer.prototype.route = function(req, response) {
     req.url = this.index;
   }
   
-  console.log(this.files);
-  console.log(req.url);
   if (this.files[req.url]) {
     fs.readFile(this.files[req.url], {encoding: "binary"}, function(err, file) {
       if (err) {
-        response.writeHead(404);
-        return response.end(err.code);
+        console.error('Error reading ' + req.url + ':' + this.files[req.url] + " - " + err);
+        this.sendError(res);
+        return;
       }
-      response.writeHead(200, {
+      res.writeHead(200, {
         'Content-Length': file.length,
         'Content-Type': mime.lookup(this.files[req.url])
       });
-      response.write(file, "binary");
-      response.end();
+      res.write(file, "binary");
+      res.end();
     }.bind(this));
-  }
-  else if (this.manifests[req.url]) {
+  } else if (this.manifests[req.url]) {
     var data = JSON.stringify(this.manifests[req.url]);
-    response.writeHead(200, {
+    res.writeHead(200, {
       'Content-Length': data.length,
       'Content-Type': 'application/json'
     });
-    response.write(data);
-    response.end();
-  }
-  else {
-    response.writeHead(404);
-    response.end("404: Not Found");
+    res.write(data);
+    res.end();
+  } else {
+    this.sendError(res);
   }
 };
 
-exports.serve = function(manifest) {
-  var server = new FileServer();
+/** ERROR HANDLING **/
+FileServer.prototype.sendError = function(res) {
+  console.log("Generating error");
+  var err = new Error('Not Found');
+  err.status = 404;
+  res.status(err.status);
+  
+  if (this.debug) {
+    res.render('error', {
+      message: err.message,
+      status: err.status,
+      stack: err.stack
+    });
+  } else {
+    res.render('error', {
+      message: err.message,
+      status: err.status,
+      stack: ''
+    });
+  }
+};
+
+exports.serve = function(manifest, debug) {
+  var server = new FileServer(debug);
   server.serveModule('./', manifest);
   router.get('*', server.route.bind(server));
   return router;
