@@ -1,3 +1,5 @@
+var KEYSTORE_PATH = 'keystore.db';
+
 var Cookies = require("cookies");
 var keygrip = require("keygrip");
 var fs = require('fs');
@@ -7,14 +9,14 @@ var keyManager;
 require('crypto').randomBytes(48, function(ex, buf) {
   var key = buf.toString('hex');
   var existing = [];
-  if (fs.existsSync('keystore')) {
-    existing = JSON.parse(require('fs').readFileSync('keystore'));
+  if (fs.existsSync(KEYSTORE_PATH)) {
+    existing = JSON.parse(require('fs').readFileSync(KEYSTORE_PATH));
   }
   existing.unshift(key);
   if (existing.length > 10) {
     existing.pop();
   }
-  require('fs').writeFileSync('keystore', JSON.stringify(existing));
+  require('fs').writeFileSync(KEYSTORE_PATH, JSON.stringify(existing));
   keyManager = keygrip(existing);
 });
 

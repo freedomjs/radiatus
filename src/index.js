@@ -31,7 +31,7 @@ app.use(morgan('dev'));
 
 app.all('/freedom/*', userRouter.route);
 app.get('/freedom.js', function(req, res) {
-  res.end(require('fs').readFileSync('node_modules/freedom/freedom.js'));
+  res.end(require('fs').readFileSync('./node_modules/freedom/freedom.js'));
 });
 app.get('*', fileServer.route.bind(fileServer));
 
