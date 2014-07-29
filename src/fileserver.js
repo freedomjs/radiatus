@@ -1,14 +1,21 @@
+/** 
+ * FileServer class
+ * - Takes in a root module's manifest file and
+ *   serves all relevant files in the dependency tree
+ **/
 var fs = require('fs');
 var path = require('path');
 var mime = require('mime');
+var express = require('express');
+var router = express.Router();
 
-var fileServer = function() {
+var FileServer = function() {
   this.files = {};
   this.manifests = {};
   this.index = null;
 };
 
-fileServer.prototype.serveModule = function(prefix, url) {
+FileServer.prototype.serveModule = function(prefix, url) {
   fs.readFile(url, function(err, file) {
     if (err) {
       throw err;
@@ -52,30 +59,34 @@ fileServer.prototype.serveModule = function(prefix, url) {
 };
 
 // Handle web requests against known files.
-fileServer.prototype.route = function(req, response) {
-  if (req.params[0].length && req.params[0][0] == '/') {
-    req.params[0] = req.params[0].substr(1);
+FileServer.prototype.route = function(req, response) {
+  // Remove leading '/'
+  if (req.url.length && req.url[0] == '/') {
+    req.url = req.url.substr(1);
   }
-  if (!req.params[0] && this.index) {
-    req.params[0] = this.index;
+  // Check if grabbing index
+  if ((!req.url || req.url == '') && this.index) {
+    req.url = this.index;
   }
-
-  if (this.files[req.params[0]]) {
-    fs.readFile(this.files[req.params[0]], {encoding: "binary"}, function(err, file) {
+  
+  console.log(this.files);
+  console.log(req.url);
+  if (this.files[req.url]) {
+    fs.readFile(this.files[req.url], {encoding: "binary"}, function(err, file) {
       if (err) {
         response.writeHead(404);
         return response.end(err.code);
       }
       response.writeHead(200, {
         'Content-Length': file.length,
-        'Content-Type': mime.lookup(this.files[req.params[0]])
+        'Content-Type': mime.lookup(this.files[req.url])
       });
       response.write(file, "binary");
       response.end();
     }.bind(this));
   }
-  else if (this.manifests[req.params[0]]) {
-    var data = JSON.stringify(this.manifests[req.params[0]]);
+  else if (this.manifests[req.url]) {
+    var data = JSON.stringify(this.manifests[req.url]);
     response.writeHead(200, {
       'Content-Length': data.length,
       'Content-Type': 'application/json'
@@ -90,7 +101,8 @@ fileServer.prototype.route = function(req, response) {
 };
 
 exports.serve = function(manifest) {
-  var server = new fileServer();
+  var server = new FileServer();
   server.serveModule('./', manifest);
-  return server;
+  router.get('*', server.route.bind(server));
+  return router;
 };
