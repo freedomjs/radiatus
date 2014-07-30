@@ -61,7 +61,11 @@ app.use(session({
 /** ROUTES **/
 // socket.io endpoint
 // @TODO - user management
-io.on('connection', processManager.onConnection.bind(processManager, 'user'));
+io.on('connection', processManager.onConnection.bind(
+  processManager, 
+  'user', 
+  path.join(__dirname, '../', opts.path)
+));
 // This serves static files from 'src/client/' (includes freedom.js)
 app.use('/freedom.js', express.static(path.join(__dirname, 'client/freedom.js')));
 // Serve files from the freedom.js dependency tree

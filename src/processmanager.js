@@ -5,10 +5,10 @@ function ProcessManager() {
   this._fContexts = {};
 }
 
-ProcessManager.prototype.onConnection = function(name, socket) {
+ProcessManager.prototype.onConnection = function(name, manifest, socket) {
   console.log('a user connected');
   //@TODO - replace hardcoded manifest
-  var fContext = freedom.freedom('../demo/tictak/manifest.json');
+  var fContext = freedom.freedom(manifest);
   this._sockets[name] = socket;
   this._fContexts[name] = fContext;
   

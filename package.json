@@ -4,6 +4,7 @@
   "description": "Node web server for freedom.js apps",
   "main": "index.js",
   "scripts": {
+    "start": "supervisor -i node_modules/ -- src/index.js demo/tictak/manifest.json -d",
     "test": "grunt test"
   },
   "repository": {
