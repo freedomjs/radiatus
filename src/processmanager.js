@@ -12,24 +12,28 @@ ProcessManager.prototype.onConnection = function(name, socket) {
   this._sockets[name] = socket;
   this._fContexts[name] = fContext;
   
-  //@TODO - need a generic listener
-  fContext.on('stats', function(socket, data) {
-    console.log(data);
-    socket.emit('message', {
-      label: 'stats',
+  function Handler(socket) {
+    this._label = null;
+    this._socket = socket;
+  }
+  Handler.prototype.checkLabel = function(label) {
+    this._label = label; 
+    return true;
+  }; 
+  Handler.prototype.processData = function(data) {
+    this._socket.emit('message', {
+      label: this._label,
       data: data
     });
-  }.bind(this, socket));
-  fContext.on('board', function(socket, data) {
-    console.log(data);
-    socket.emit('message', {
-      label: 'board',
-      data: data
-    });
-  }.bind(this, socket));
+  };
+
+  var handler = new Handler(socket);
+  fContext.on(
+    handler.checkLabel.bind(handler),
+    handler.processData.bind(handler)
+  );
 
   socket.on('message', function(fContext, msg) {
-    console.log(msg);
     fContext.emit(msg.label, msg.data);
   }.bind(this, fContext));
 
