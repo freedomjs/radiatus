@@ -18,7 +18,7 @@
       this._pushQueue('on', label, callback);
     }
 
-    console.log('on:' + label);
+    console.log('register:on:' + label);
     if (!this._onCallbacks.hasOwnProperty(label)) {
       this._onCallbacks[label] = [];
     }
@@ -47,7 +47,7 @@
       this._pushQueue('emit', label, data);
     }
 
-    console.log('emit:'+label+':'+data);
+    console.log('emit:'+label+':'+JSON.stringify(data));
     this._socket.emit('message', {
       label: label,
       data: data
@@ -77,6 +77,7 @@
 
   Freedom.prototype._onMessage = function(msg) {
     var label = msg.label;
+    console.log('on:' + msg.label+':'+JSON.stringify(msg.data));
     if (this._onCallbacks.hasOwnProperty(label)) {
       var callbacks = this._onCallbacks[label];
       for (var i=0; i<callbacks.length; i++) {

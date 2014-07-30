@@ -38,6 +38,7 @@ ProcessManager.prototype.onConnection = function(name, manifest, socket) {
     return true;
   }; 
   Handler.prototype.processData = function(data) {
+    console.log('on:'+this._label+':'+JSON.stringify(data));
     this._socket.emit('message', {
       label: this._label,
       data: data
@@ -51,6 +52,7 @@ ProcessManager.prototype.onConnection = function(name, manifest, socket) {
   );
 
   socket.on('message', function(fContext, msg) {
+    console.log('emit:'+msg.label+':'+JSON.stringify(msg.data));
     fContext.emit(msg.label, msg.data);
   }.bind(this, fContext));
 
