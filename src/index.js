@@ -6,12 +6,15 @@ var freedom = require('freedom');
 var express = require('express');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
+var connect = require('connect');
 var morgan  = require('morgan')
 
 /** APPLICATION **/
 var app = express();
+var sessionStore = session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var config = require('../config');
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
@@ -37,26 +40,33 @@ var opts = require('nomnom')
 //var userRouter = require('./userrouter');
 var fileServer = require('./fileserver').serve(opts.path, opts.debug);
 var ProcessManager = require('./processmanager').ProcessManager;
-var processManager = new ProcessManager();
+var processManager = new ProcessManager(sessionStore, cookieParser(config.sessionKey));
 
-/** MIDDLEWARE **/
+/** VIEW ENGINE **/
 // View engine setup (only for errors right now)
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
+
+/** LOGGER **/
 // Request logger
 if (opts.debug) {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('common'));
 }
-// Setup sessions
+
+/** SESSIONS/COOKIES **/
 app.use(cookieParser());
+// For alternatives, see
+// https://github.com/senchalabs/connect/wiki
 app.use(session({
-  secret: 'secret',
+  secret: config.sessionKey,
+  store: sessionStore,
   name: 'session',
   resave: true,
   saveUninitialized: true
 }));
+io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/
 // socket.io endpoint

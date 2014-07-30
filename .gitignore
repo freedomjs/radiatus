@@ -1,3 +1,5 @@
 keystore.db
-node_modules
+node_modules/
 .*.swp
+config.js
+npm-debug.log

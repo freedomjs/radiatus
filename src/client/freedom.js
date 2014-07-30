@@ -23,6 +23,11 @@
       this._onCallbacks[label] = [];
     }
     this._onCallbacks[label].push(callback);
+    /**
+    this._onCallbacks[label].push(function(data) {
+      console.log(data);
+    });
+    **/
   };
 
   Freedom.prototype.once = function(label, callback) {

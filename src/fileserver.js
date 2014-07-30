@@ -124,7 +124,7 @@ FileServer.prototype.sendError = function(res) {
   }
 };
 
-exports.serve = function(manifest, debug) {
+module.exports.serve = function(manifest, debug) {
   var server = new FileServer(debug);
   server.serveModule('./', manifest);
   router.get('*', server.route.bind(server));

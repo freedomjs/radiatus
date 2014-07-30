@@ -1,14 +1,31 @@
 var freedom = require('freedom-for-node');
+var cookieParser = require('cookie-parser');
 
-function ProcessManager() {
+function ProcessManager(sessionStore, cookieParser) {
   this._sockets = {};
   this._fContexts = {};
+  this._sessionStore = sessionStore;
+  this._cookieParser = cookieParser;
+  this._cookieKey = '';
 }
 
+ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
+  console.log('onAuthorization');
+  //console.log(handshakeData);
+  console.log('------------');
+  accept(null,true);
+};
+
 ProcessManager.prototype.onConnection = function(name, manifest, socket) {
-  console.log('a user connected');
+  console.log('onConnection');
+  console.log(socket.handshake.headers.cookie);
+  console.log(socket.handshake.session);
+  console.log('------------');
+
   //@TODO - replace hardcoded manifest
-  var fContext = freedom.freedom(manifest);
+  var fContext = freedom.freedom(manifest, {
+    debug: false
+  });
   this._sockets[name] = socket;
   this._fContexts[name] = fContext;
   
@@ -43,4 +60,4 @@ ProcessManager.prototype.onConnection = function(name, manifest, socket) {
 
 };
 
-exports.ProcessManager = ProcessManager;
+module.exports.ProcessManager = ProcessManager;
