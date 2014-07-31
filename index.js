@@ -7,10 +7,12 @@ var express = require('express');
 var partials = require('express-partials');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 var connect = require('connect');
 var morgan  = require('morgan');
 var csrf = require('csurf');
 var passport = require('passport');
+var flash = require('connect-flash');
 
 /** APPLICATION **/
 var app = express();
@@ -69,6 +71,8 @@ app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 
 /** SESSIONS/COOKIES **/
 app.use(cookieParser());
+app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded());
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
 app.use(session({
@@ -81,6 +85,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(csrf());
+app.use(flash());
 io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/
