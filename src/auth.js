@@ -34,4 +34,10 @@ router.post('/login', passport.authenticate('local', {
   failureFlash: true
 }));
 
+router.post('/register', passport.authenticate('local', { 
+  successRedirect: '/',
+  failureRedirect: '/login',
+  failureFlash: true
+}));
+
 module.exports = router

@@ -1,4 +1,5 @@
 module.exports = {
   sessionSecret: 'secret key',
-  cookieKey: 'session'
+  cookieKey: 'session',
+  openRegistration: false
 };

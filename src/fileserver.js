@@ -115,13 +115,14 @@ FileServer.prototype.sendError = function(res) {
   
   if (this.debug) {
     res.render('error', {
-      layout: false,  //Removes outer template
+      layout: 'layout',
       message: err.message,
       status: err.status,
       stack: err.stack
     });
   } else {
     res.render('error', {
+      layout: 'layout',
       message: err.message,
       status: err.status,
       stack: ''
