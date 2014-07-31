@@ -18,21 +18,21 @@ ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
 
   if (!(handshakeData && handshakeData._query && handshakeData._query.csrf)) {
     console.error("onAuthorization: missing csrf token");
-    accept('MISSING_CSRF', true);
+    accept('MISSING_CSRF', false);
     return;
   }
   
   this._cookieParser(handshakeData, {}, function(err) {
     if (err) {
       console.error("onAuthorization: error parsing cookies");
-      accept('COOKIE_PARSE_ERROR', true);
+      accept('COOKIE_PARSE_ERROR', false);
       return;
     }
     var sessionId = handshakeData.signedCookies[this._cookieKey]
     this._sessionStore.load(sessionId, function(err, session) {
       if (err || !session) {
         console.error("onAuthorization: invalid session");
-        accept('INVALID_SESSION', true);
+        accept('INVALID_SESSION', false);
         return;
       }
       var token = handshakeData._query.csrf;
@@ -40,7 +40,7 @@ ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
 
       if (session.customCSRF !== token) {
         console.error("onAuthorization: invalid csrf token");
-        accept('INVALID_CSRFTOKEN', true);
+        accept('INVALID_CSRFTOKEN', false);
         return;
       }
       accept(null, true);
