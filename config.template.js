@@ -1,3 +1,4 @@
-exports = {
-  sessionKey = 'secret key'
+module.exports = {
+  sessionSecret: 'secret key',
+  cookieKey: 'session'
 };

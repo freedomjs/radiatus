@@ -1,10 +1,12 @@
 (function(exports) {
   //Load socket.io client library
-  var script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.src = '/socket.io/socket.io.js';
-  var topScript = document.getElementsByTagName('script')[0];
-  topScript.parentNode.insertBefore(script, topScript);
+  function loadScript(url) {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+    var topScript = document.getElementsByTagName('script')[0];
+    topScript.parentNode.insertBefore(script, topScript);
+  }
 
   function Freedom() {
     this._socket = null;
@@ -78,6 +80,8 @@
   Freedom.prototype._onMessage = function(msg) {
     var label = msg.label;
     console.log('on:' + msg.label+':'+JSON.stringify(msg.data));
+    this._flushQueue();
+    
     if (this._onCallbacks.hasOwnProperty(label)) {
       var callbacks = this._onCallbacks[label];
       for (var i=0; i<callbacks.length; i++) {
@@ -98,11 +102,16 @@
     exports.freedom = freedom;
 
     // Need to wait until socket.io has fully loaded
-    if (typeof exports.io == 'undefined') {
+    if (typeof exports.io == 'undefined' || 
+        typeof exports.Cookies == 'undefined') {
       setTimeout(init.bind(this, exports), 0);
       return;
     }
-    freedom._onSocket(exports.io());
+    var csrfToken = exports.Cookies.get('XSRF-TOKEN');
+    freedom._onSocket(exports.io('/?csrf='+csrfToken));
+    //freedom._onSocket(exports.io());
   };
+  loadScript('//cdnjs.cloudflare.com/ajax/libs/Cookies.js/0.4.0/cookies.min.js');
+  loadScript('/socket.io/socket.io.js');
   init(exports);
 })(window);

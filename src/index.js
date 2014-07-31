@@ -7,11 +7,12 @@ var express = require('express');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var connect = require('connect');
-var morgan  = require('morgan')
+var morgan  = require('morgan');
+var csrf = require('csurf');
 
 /** APPLICATION **/
 var app = express();
-var sessionStore = session.MemoryStore();
+var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var config = require('../config');
@@ -40,7 +41,11 @@ var opts = require('nomnom')
 //var userRouter = require('./userrouter');
 var fileServer = require('./fileserver').serve(opts.path, opts.debug);
 var ProcessManager = require('./processmanager').ProcessManager;
-var processManager = new ProcessManager(sessionStore, cookieParser(config.sessionKey));
+var processManager = new ProcessManager(
+  sessionStore, 
+  cookieParser(config.sessionSecret),
+  config.cookieKey
+);
 
 /** VIEW ENGINE **/
 // View engine setup (only for errors right now)
@@ -60,12 +65,13 @@ app.use(cookieParser());
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
 app.use(session({
-  secret: config.sessionKey,
+  secret: config.sessionSecret,
   store: sessionStore,
-  name: 'session',
+  name: config.cookieKey,
   resave: true,
   saveUninitialized: true
 }));
+app.use(csrf());
 io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/

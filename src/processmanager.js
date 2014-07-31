@@ -1,25 +1,57 @@
 var freedom = require('freedom-for-node');
 var cookieParser = require('cookie-parser');
 
-function ProcessManager(sessionStore, cookieParser) {
+function ProcessManager(sessionStore, cookieParser, cookieKey) {
   this._sockets = {};
   this._fContexts = {};
   this._sessionStore = sessionStore;
   this._cookieParser = cookieParser;
-  this._cookieKey = '';
+  this._cookieKey = cookieKey;
 }
 
 ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
+  /**
   console.log('onAuthorization');
-  //console.log(handshakeData);
+  console.log(handshakeData._query.csrf);
   console.log('------------');
-  accept(null,true);
+  **/
+
+  if (!(handshakeData && handshakeData._query && handshakeData._query.csrf)) {
+    console.error("onAuthorization: missing csrf token");
+    accept('MISSING_CSRF', true);
+    return;
+  }
+  
+  this._cookieParser(handshakeData, {}, function(err) {
+    if (err) {
+      console.error("onAuthorization: error parsing cookies");
+      accept('COOKIE_PARSE_ERROR', true);
+      return;
+    }
+    var sessionId = handshakeData.signedCookies[this._cookieKey]
+    this._sessionStore.load(sessionId, function(err, session) {
+      if (err || !session) {
+        console.error("onAuthorization: invalid session");
+        accept('INVALID_SESSION', true);
+        return;
+      }
+      var token = handshakeData._query.csrf;
+      handshakeData.session = session;
+
+      if (session.customCSRF !== token) {
+        console.error("onAuthorization: invalid csrf token");
+        accept('INVALID_CSRFTOKEN', true);
+        return;
+      }
+      accept(null, true);
+    });
+
+  }.bind(this));
 };
 
 ProcessManager.prototype.onConnection = function(name, manifest, socket) {
   console.log('onConnection');
   console.log(socket.handshake.headers.cookie);
-  console.log(socket.handshake.session);
   console.log('------------');
 
   //@TODO - replace hardcoded manifest
