@@ -115,6 +115,7 @@ FileServer.prototype.sendError = function(res) {
   
   if (this.debug) {
     res.render('error', {
+      layout: false,  //Removes outer template
       message: err.message,
       status: err.status,
       stack: err.stack
@@ -128,9 +129,19 @@ FileServer.prototype.sendError = function(res) {
   }
 };
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    console.log('Authenticated as ' + req.user);
+    next();
+  } else {
+    console.log("Not authenticated");
+    res.render('login', {layout: 'layout'});
+  }
+}
+
 module.exports.serve = function(manifest, debug) {
   var server = new FileServer(debug);
   server.serveModule('./', manifest);
-  router.get('*', server.route.bind(server));
+  router.get('*', ensureAuthenticated, server.route.bind(server));
   return router;
 };

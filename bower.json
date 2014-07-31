@@ -1,0 +1,10 @@
+{
+  "name": "radiatus",
+  "description": "",
+  "version": "0.0.1",
+  "homepage": "https://github.com/freedomjs/radiatus",
+  "private": true,
+  "dependencies": {
+    "foundation": "~5.3.0"
+  }
+}

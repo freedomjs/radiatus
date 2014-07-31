@@ -4,6 +4,7 @@
 var path = require('path');
 var freedom = require('freedom');
 var express = require('express');
+var partials = require('express-partials');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var connect = require('connect');
@@ -53,6 +54,7 @@ var processManager = new ProcessManager(
 // View engine setup (only for errors right now)
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
+app.use(partials());
 
 /** LOGGER **/
 // Request logger
@@ -61,6 +63,9 @@ if (opts.debug) {
 } else {
   app.use(morgan('common'));
 }
+
+/** STATIC CONTENT **/
+app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 
 /** SESSIONS/COOKIES **/
 app.use(cookieParser());
@@ -87,15 +92,12 @@ io.on('connection', processManager.onConnection.bind(
   path.join(__dirname, opts.path)
 ));
 // User authentication
-app.use('/auth', authRouter);
+app.use('/radiatus/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
 app.use('/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
-//app.get('*', fileServer.route.bind(fileServer));
-/**
-app.all('/freedom/*', userRouter.route);
-**/
+//app.all('/freedom/*', userRouter.route);
 
 /** START 'ER UP**/
 http.listen(opts.port, function() {

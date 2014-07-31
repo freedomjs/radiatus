@@ -1,5 +1,8 @@
 keystore.db
-node_modules/
-.*.swp
 config.js
+
+node_modules/
+public/bower_components/
+
+.*.swp
 npm-debug.log
