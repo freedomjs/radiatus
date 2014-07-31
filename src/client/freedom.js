@@ -89,9 +89,6 @@
   };
 
   function init(exports) {
-    var freedom = new Freedom();
-    exports.freedom = freedom;
-
     // Need to wait until socket.io has fully loaded
     if (typeof exports.io == 'undefined' || 
         typeof exports.Cookies == 'undefined') {
@@ -99,9 +96,11 @@
       return;
     }
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
-    freedom._onSocket(exports.io('/?csrf='+csrfToken));
+    exports.freedom._onSocket(exports.io('/?csrf='+csrfToken));
     //freedom._onSocket(exports.io());
   };
+  var freedom = new Freedom();
+  exports.freedom = freedom;
   loadScript('//cdnjs.cloudflare.com/ajax/libs/Cookies.js/0.4.0/cookies.min.js');
   loadScript('/socket.io/socket.io.js');
   init(exports);
