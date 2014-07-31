@@ -9,6 +9,7 @@ var cookieParser = require('cookie-parser');
 var connect = require('connect');
 var morgan  = require('morgan');
 var csrf = require('csurf');
+var passport = require('passport');
 
 /** APPLICATION **/
 var app = express();
@@ -39,6 +40,7 @@ var opts = require('nomnom')
 
 /** SUBMODULES **/
 //var userRouter = require('./userrouter');
+var authRouter = require('./auth');
 var fileServer = require('./fileserver').serve(opts.path, opts.debug);
 var ProcessManager = require('./processmanager').ProcessManager;
 var processManager = new ProcessManager(
@@ -71,6 +73,8 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(csrf());
 io.set('authorization', processManager.onAuthorization.bind(processManager));
 
@@ -82,6 +86,8 @@ io.on('connection', processManager.onConnection.bind(
   'user', 
   path.join(__dirname, '../', opts.path)
 ));
+// User authentication
+app.use('/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
 app.use('/freedom.js', express.static(path.join(__dirname, 'client/freedom.js')));
 // Serve files from the freedom.js dependency tree
