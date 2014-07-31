@@ -16,7 +16,7 @@ var app = express();
 var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var config = require('../config');
+var config = require('./config');
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
@@ -40,9 +40,9 @@ var opts = require('nomnom')
 
 /** SUBMODULES **/
 //var userRouter = require('./userrouter');
-var authRouter = require('./auth');
-var fileServer = require('./fileserver').serve(opts.path, opts.debug);
-var ProcessManager = require('./processmanager').ProcessManager;
+var authRouter = require('./src/auth');
+var fileServer = require('./src/fileserver').serve(opts.path, opts.debug);
+var ProcessManager = require('./src/processmanager').ProcessManager;
 var processManager = new ProcessManager(
   sessionStore, 
   cookieParser(config.sessionSecret),
@@ -51,7 +51,7 @@ var processManager = new ProcessManager(
 
 /** VIEW ENGINE **/
 // View engine setup (only for errors right now)
-app.set('views', path.join(__dirname, '../views'));
+app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
 
 /** LOGGER **/
@@ -84,12 +84,12 @@ io.set('authorization', processManager.onAuthorization.bind(processManager));
 io.on('connection', processManager.onConnection.bind(
   processManager, 
   'user', 
-  path.join(__dirname, '../', opts.path)
+  path.join(__dirname, opts.path)
 ));
 // User authentication
 app.use('/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
-app.use('/freedom.js', express.static(path.join(__dirname, 'client/freedom.js')));
+app.use('/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.get('*', fileServer.route.bind(fileServer));
