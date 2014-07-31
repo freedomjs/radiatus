@@ -89,9 +89,6 @@ app.use('/', fileServer);
 //app.get('*', fileServer.route.bind(fileServer));
 /**
 app.all('/freedom/*', userRouter.route);
-app.get('/freedom.js', function(req, res) {
-  res.end(require('fs').readFileSync('./src/client/freedom.js'));
-});
 **/
 
 /** START 'ER UP**/

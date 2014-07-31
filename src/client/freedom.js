@@ -16,10 +16,6 @@
   }
 
   Freedom.prototype.on = function(label, callback) {
-    if (this._socket == null) {
-      this._pushQueue('on', label, callback);
-    }
-
     console.log('register:on:' + label);
     if (!this._onCallbacks.hasOwnProperty(label)) {
       this._onCallbacks[label] = [];
@@ -33,10 +29,6 @@
   };
 
   Freedom.prototype.once = function(label, callback) {
-    if (this._socket == null) {
-      this._pushQueue('once', label, callback);
-    }
-
     console.log('once:' + label);
     if (!this._onceCallbacks.hasOwnProperty(label)) {
       this._onceCallbacks[label] = [];
@@ -64,15 +56,15 @@
 
   Freedom.prototype._pushQueue = function(method, label, payload) {
     this._queue.push({
-      method: method,
-      args: [label, payload]
+      label: label,
+      data: payload
     });
   };
 
   Freedom.prototype._flushQueue = function() {
     for (var i=0; i<this._queue.length; i++) {
       var action = this._queue[i];
-      this[action.method].apply(null, action.args);
+      this.emit(action.label, action.data);
     }
     this._queue = [];
   };
@@ -80,7 +72,6 @@
   Freedom.prototype._onMessage = function(msg) {
     var label = msg.label;
     console.log('on:' + msg.label+':'+JSON.stringify(msg.data));
-    this._flushQueue();
     
     if (this._onCallbacks.hasOwnProperty(label)) {
       var callbacks = this._onCallbacks[label];
