@@ -74,7 +74,7 @@ FileServer.prototype.route = function(req, res, next) {
   if ((!req.url || req.url == '') && this.index) {
     // Establish a CSRF Token for the session
     var token = req.csrfToken();
-    req.session.customCSRF = req.csrfToken();
+    req.session.customCSRF = token;
     res.cookie('XSRF-TOKEN', token);
     req.url = this.index;
   }

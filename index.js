@@ -8,6 +8,7 @@ var partials = require('express-partials');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
 var connect = require('connect');
 var morgan  = require('morgan');
 var csrf = require('csurf');
@@ -73,6 +74,7 @@ app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 app.use(cookieParser(config.sessionSecret));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride());
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
 app.use(session({
