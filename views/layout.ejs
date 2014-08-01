@@ -13,7 +13,15 @@
   <body>
     <h1>Radiatus</h1>
 
-    <%- body%>
+		<% if (user) { %>
+			<p>
+			<a href="/">Home</a> | 
+			<a href="/radiatus/auth/account">Account</a> | 
+			<a href="/radiatus/auth/logout">Log Out</a>
+			</p>
+		<% } %>
+
+    <%- body %>
     
     <p>
       IMPORTANT: This is loaded over unencrypted HTTP. <br>

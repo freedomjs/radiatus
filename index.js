@@ -2,21 +2,21 @@
  * Radiatus Entry
  **/
 var path = require('path');
-var freedom = require('freedom');
 var express = require('express');
+var passport = require('passport');
 var partials = require('express-partials');
-var session = require('express-session');
+var morgan  = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
-var connect = require('connect');
-var morgan  = require('morgan');
+var session = require('express-session');
 var csrf = require('csurf');
-var passport = require('passport');
 var flash = require('connect-flash');
 
 /** APPLICATION **/
 var app = express();
+// For alternatives, see
+// https://github.com/senchalabs/connect/wiki
 var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -75,8 +75,6 @@ app.use(cookieParser(config.sessionSecret));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
-// For alternatives, see
-// https://github.com/senchalabs/connect/wiki
 app.use(session({
   store: sessionStore,
   secret: config.sessionSecret,
