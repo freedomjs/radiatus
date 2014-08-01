@@ -143,7 +143,7 @@ function ensureAuthenticated(req, res, next) {
     //next();
   } else {
     console.log("Not authenticated");
-  res.render('login', { user: req.user, message: req.session.messages, csrf: ''});
+  res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
 /**
     res.render('login', {
       layout: 'layout',

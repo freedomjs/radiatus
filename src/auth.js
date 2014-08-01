@@ -117,7 +117,7 @@ router.post('/login', function(req, res, next) {
 });
 
 router.get('/login', function(req, res){
-  res.render('login', { user: req.user, message: req.session.messages, csrf: ''});
+  res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
 });
 
 // Simple route middleware to ensure user is authenticated.

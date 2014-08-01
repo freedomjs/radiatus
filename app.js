@@ -19,6 +19,8 @@ var app = express();
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
 var sessionStore = new session.MemoryStore();
+var http = require('http').Server(app);
+//var io = require('socket.io')(http);
 var config = require('./config');
 
 /** OPTIONS PARSING **/
@@ -45,6 +47,12 @@ var opts = require('nomnom')
 //var userRouter = require('./userrouter');
 var authRouter = require('./src/auth');
 var fileServer = require('./src/fileserver').serve(opts.path, opts.debug);
+var ProcessManager = require('./src/processmanager').ProcessManager;
+var processManager = new ProcessManager(
+  sessionStore, 
+  cookieParser(config.sessionSecret),
+  config.cookieKey
+);
 
 /** VIEW ENGINE **/
 // View engine setup (only for errors right now)
@@ -77,13 +85,30 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(csrf());
+//app.use(flash());
+//io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/
+// socket.io endpoint
+// @TODO - user management
+/**
+io.on('connection', processManager.onConnection.bind(
+  processManager, 
+  'user', 
+  path.join(__dirname, opts.path)
+));
+**/
+
 // User authentication
 app.use('/radiatus/auth', authRouter);
+// This serves static files from 'src/client/' (includes freedom.js)
+app.use('/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
+//app.all('/freedom/*', userRouter.route);
 
-app.listen(8080, function() {
-  console.log('Express server listening on port 8080');
+/** START 'ER UP**/
+http.listen(opts.port, function() {
+  console.log("Radiatus is running on port " + opts.port);
 });
