@@ -142,6 +142,7 @@ function ensureAuthenticated(req, res, next) {
     console.log("Not authenticated");
     res.render('login', {
       layout: 'layout',
+      csrf: req.csrfToken(),
       message: req.flash('loginMessage')
     });
   }

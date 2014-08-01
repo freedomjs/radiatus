@@ -4,38 +4,47 @@ var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var User = require('./user');
 
-passport.use('local-login', new LocalStrategy({
-  usernameField: 'username',
-  passwordField: 'password',
-  passReqToCallback: true
-}, function(req, username, password, done) {
+passport.use(new LocalStrategy(function(username, password, done) {
+    console.log("start");
   User.findOne({ 'local.username': username }, function(err, user) {
-    if (err) { return done(err); }
+    if (err) { 
+      console.error(err);
+      return done(err); 
+    }
     if (!user || !user.validPassword(password)) {
+      console.log('incorrect');
       return done(null, false, req.flash('loginMessage', 'Incorrect username/password'));
     }
+    console.log("good");
     return done(null, user);
   });
 }));
-
+/** 
 passport.use('local-signup', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
   passReqToCallback: true
 }, function(req, username, password, done) {
+    console.log("start");
   process.nextTick(function() {
+    console.log("start");
     User.findOne({ 'local.username': username }, function(err, user) {
       if (err) {
+        console.error(err);
         return done(err);
       } else if (user) {
+        console.error('taken');
         return done(null, false, req.flash('loginMessage', 'That username is already taken'));
       }
 
+      console.log(username);
+      console.log(password);
       var newUser = new User();
       newUser.local.username = username;
       newUser.local.password = newUser.generateHash(password);
       newUser.save(function(err) {
         if (err) {
+          console.error(err);
           throw err;
         }
         return done(null, newUser);
@@ -43,7 +52,7 @@ passport.use('local-signup', new LocalStrategy({
     }); //User.findOne
   }); //process.nextTick
 })); //passport.Use
-
+**/
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
@@ -54,19 +63,21 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-router.post('/login', passport.authenticate('local-login', { 
-  successRedirect: '/',
-  failureRedirect: '/',
-  failureFlash: true
-}));
+router.post('/login', passport.authenticate('local', { 
+  failureRedirect: '/b'
+}), function(req, res) {
+  console.log("!!!");
+});
 
+/**
 router.post('/signup', passport.authenticate('local-signup', { 
-  successRedirect: '/',
-  failureRedirect: '/',
+  successRedirect: '/c',
+  failureRedirect: '/d',
   failureFlash: true
 }));
+**/
 
-router.post('/logout', function(req, res) {
+router.get('/logout', function(req, res) {
   req.logout();
   res.redirect('/');
 });

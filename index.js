@@ -70,14 +70,14 @@ if (opts.debug) {
 app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 
 /** SESSIONS/COOKIES **/
-app.use(cookieParser());
+app.use(cookieParser(config.sessionSecret));
 app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended: true}));
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
 app.use(session({
-  secret: config.sessionSecret,
   store: sessionStore,
+  secret: config.sessionSecret,
   name: config.cookieKey,
   resave: true,
   saveUninitialized: true
