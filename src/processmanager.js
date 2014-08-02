@@ -2,9 +2,14 @@ var freedom = require('freedom-for-node');
 var cookieParser = require('cookie-parser');
 var User = require('./user');
 
+var freedomcfg = function(register) {
+  console.log("!!!");
+};
+
 function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {
-  this._sockets = {};
+  this._handlers = {};
   this._fContexts = {};
+
   this._manifest = manifest;
   this._sessionStore = sessionStore;
   this._cookieParser = cookieParser;
@@ -27,9 +32,19 @@ ProcessManager.prototype.getOrCreateFreedom = function(username) {
   }
   console.log("Creating freedom.js module for " + username);
   var fContext = freedom.freedom(this._manifest, {
-    debug: false
+    debug: false,
+    advertise: true
   });
   this._fContexts[username] = fContext;
+  
+  var handler = new Handler(username);
+  this._handlers[username] = handler;
+    
+  fContext.on(
+    handler.checkLabel.bind(handler),
+    handler.processData.bind(handler)
+  );
+
   return fContext;
 };
 
@@ -98,14 +113,8 @@ ProcessManager.prototype.onConnection = function(socket) {
 
     var username = user.username;
     var fContext = this.getOrCreateFreedom(username);
-    this._sockets[username] = socket;
-    var handler = new Handler(username, socket);
+    this._handlers[username].setSocket(socket);
     
-    fContext.on(
-      handler.checkLabel.bind(handler),
-      handler.processData.bind(handler)
-    );
-
     socket.on('message', function(username, fContext, msg) {
       console.log(username+':emit:'+msg.label+':'+JSON.stringify(msg.data));
       fContext.emit(msg.label, msg.data);
@@ -119,11 +128,14 @@ ProcessManager.prototype.onConnection = function(socket) {
   
 };
 
-function Handler(username, socket) {
+function Handler(username) {
   this._username = username;
   this._label = null;
-  this._socket = socket;
+  this._socket = null;
 }
+Handler.prototype.setSocket = function(socket) {
+  this._socket = socket;
+};
 Handler.prototype.checkLabel = function(label) {
   this._label = label; 
   return true;
