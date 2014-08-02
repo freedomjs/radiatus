@@ -4,11 +4,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var User = require('./user');
 
-// Use the LocalStrategy within Passport.
-//   Strategies in passport require a `verify` function, which accept
-//   credentials (in this case, a username and password), and invoke a callback
-//   with a user object.  In the real world, this would query a database;
-//   however, in this example we are using a baked-in set of users.
 passport.use('local-login', new LocalStrategy(function(username, password, done) {
   User.findOne({ username: username }, function(err, user) {
     if (err) { return done(err); }
@@ -116,29 +111,7 @@ router.post('/login', function(req, res, next) {
   })(req, res, next);
 });
 
-router.get('/login', function(req, res){
-  res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
-});
-
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed.  Otherwise, the user will be redirected to the
-//   login page.
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/radiatus/auth/login')
-}
-router.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', { user: req.user });
-});
-
 /**
-router.post('/login', passport.authenticate('local', { 
-  failureRedirect: '/b'
-}), function(req, res) {
-  console.log("!!!");
-});
 
 router.post('/signup', passport.authenticate('local-signup', { 
   successRedirect: '/c',
@@ -146,6 +119,23 @@ router.post('/signup', passport.authenticate('local-signup', {
   failureFlash: true
 }));
 **/
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/radiatus/auth/login')
+}
+
+router.get('/account', ensureAuthenticated, function(req, res){
+  res.render('account', { user: req.user });
+});
+
+router.get('/login', function(req, res){
+  res.render('login', { 
+    user: req.user,
+    message: req.session.messages, 
+    csrf: req.csrfToken()
+  });
+});
 
 router.get('/logout', function(req, res) {
   req.logout();
