@@ -35,8 +35,10 @@ passport.use('local-signup', new LocalStrategy({
       var newUser = new User();
       newUser.username = username;
       newUser.password = password;
+      newUser.name.familyName = req.body.familyName;
+      newUser.name.givenName = req.body.givenName;
       newUser.save(function(err) {
-        if (err) { console.log('!!!'); throw err;}
+        if (err) { throw err;}
         return done(null, newUser);
       });
     }); //User.findOne

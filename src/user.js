@@ -10,8 +10,12 @@ mongoose.connection.once('open', function callback() {
 
 var userSchema = mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true}
+  password: { type: String, required: true},
   //email: { type: String, required: true, unique: true },
+  name: {
+    familyName: String,
+    givenName: String
+  }
 });
 
 // Bcrypt middleware - salt passwords
