@@ -5,6 +5,7 @@
   "homepage": "https://github.com/freedomjs/radiatus",
   "private": true,
   "dependencies": {
-    "foundation": "~5.3.0"
+    "foundation": "~5.3.0",
+    "cookies-js": "~0.4.0"
   }
 }
