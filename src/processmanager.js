@@ -16,7 +16,7 @@ ProcessManager.prototype.init = function() {
   User.find({}, function(err, docs) {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
-      this.getOrCreateFreedom(u.username);
+      //this.getOrCreateFreedom(u.username);
     }
   }.bind(this))
 };
