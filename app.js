@@ -20,7 +20,7 @@ var app = express();
 // https://github.com/senchalabs/connect/wiki
 var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
-//var io = require('socket.io')(http);
+var io = require('socket.io')(http);
 var config = require('./config');
 
 /** OPTIONS PARSING **/
@@ -85,18 +85,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(csrf());
 app.use(flash());
-//io.set('authorization', processManager.onAuthorization.bind(processManager));
+io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/
 // socket.io endpoint
 // @TODO - user management
-/**
 io.on('connection', processManager.onConnection.bind(
   processManager, 
   'user', 
   path.join(__dirname, opts.path)
 ));
-**/
 
 // User authentication
 app.use('/radiatus/auth', authRouter);

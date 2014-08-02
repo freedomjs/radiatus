@@ -132,9 +132,9 @@ FileServer.prototype.sendError = function(req, res) {
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    console.log('Authenticated as ' + req.user);
-    res.render('account', { user: req.user });
-    //next();
+    //console.log('Authenticated as ' + req.user);
+    //res.render('account', { user: req.user });
+    next();
   } else {
     console.log("Not authenticated");
     res.render('login', { 
