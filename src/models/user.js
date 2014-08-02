@@ -5,7 +5,7 @@ var config = require('../../config');
 mongoose.connect(config.userDB);
 mongoose.connection.on('error', console.error.bind(console, 'mongoose error:'));
 mongoose.connection.once('open', function callback() {
-  console.log('mongoose connection online');
+  console.log('mongoose connection online to userDB');
 });
 
 var userSchema = mongoose.Schema({

@@ -30,7 +30,7 @@ ProcessManager.prototype.getOrCreateFreedom = function(username) {
   var fContext = freedom.freedom(this._manifest, {
     debug: false,
   }, function(register) {
-    console.log("!!!");
+    register('core.storage', require('./coreproviders/storage.js').bind({}, username));
   });
   this._fContexts[username] = fContext;
   
