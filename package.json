@@ -2,7 +2,7 @@
   "name": "Radiatus",
   "version": "0.0.0",
   "description": "Node web server for freedom.js apps",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js demo/tictak/manifest.json -d",
     "debug": "supervisor -i node_modules/ -- app.js demo/tictak/manifest.json -d",

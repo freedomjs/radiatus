@@ -29,30 +29,37 @@ var Storage_node = function(username, channel, dispatch) {
 };
 
 Storage_node.prototype.keys = function(continuation) {
-
+  KeyValue.find({ username: this.username }, 'key', function(err, docs) {
+    if (err) { return continuation(undefined, this._createError(err, 'UNKNOWN')); }
+    var retValue = [];
+    if (docs) {
+      for (var i=0; i<docs.length; i++) {
+        retValue.push(docs.key);
+      }
+    }
+    continuation(retValue);
+  });
 };
 
 Storage_node.prototype.get = function(key, continuation) {
-  KeyValue.find({ username: this.username, key: key }, function(err, docs) {
+  KeyValue.findOne({ username: this.username, key: key }, function(err, doc) {
     if (err) { return continuation(undefined, this._createError(err, 'UNKNOWN')); }
-    if (docs.length <= 0) { return continuation(null); }
-    continuation(docs[0].value);
+    if (!doc) { return continuation(null); }
+    continuation(doc.value);
   }.bind(this));
 };
 
 Storage_node.prototype.set = function(key, value, continuation) {
-  KeyValue.find({ username: this.username, key: key }, function(err, docs) {
+  KeyValue.findOne({ username: this.username, key: key }, function(err, doc) {
     if (err) { return continuation(undefined, this._createError(err, 'UNKNOWN')); }
     var retValue = null;
-    var doc;
-    if (docs.length <= 0) {
+    if (!doc) {
       doc = new KeyValue({
         username: this.username,
         key: key,
         value: value
       });
     } else {
-      doc = docs[0];
       retValue = doc.value
       doc.value = value;
     }
@@ -64,15 +71,18 @@ Storage_node.prototype.set = function(key, value, continuation) {
 };
 
 Storage_node.prototype.remove = function(key, continuation) {
-  var old = this.store.get(key);
-  this.store.del(key);
-  continuation(old);
+  KeyValue.findOneAndRemove({ username: this.username, key: key}, function(err, doc) {
+    if (err) { return continuation(undefined, this._createError(err, 'UNKNOWN')); }
+    if (!doc) { return continuation(null); }
+    return continuation(doc.value);
+  });
 };
 
 Storage_node.prototype.clear = function(continuation) {
-  this.store.Store = {};
-  this.store.save();
-  continuation();
+  KeyValue.remove({ username: this.username }, function(err) {
+    if (err) { return continuation(undefined, this._createError(err, 'UNKNOWN')); }
+    continuation(null);
+  });
 };
 
 Storage_node.prototype._createError = function(error, errcode) {
