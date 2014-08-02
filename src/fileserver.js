@@ -83,7 +83,7 @@ FileServer.prototype.route = function(req, res, next) {
     fs.readFile(this.files[req.url], {encoding: "binary"}, function(err, file) {
       if (err) {
         console.error('Error reading ' + req.url + ':' + this.files[req.url] + " - " + err);
-        this.sendError(res);
+        this.sendError(req, res);
         return;
       }
       res.writeHead(200, {
@@ -102,12 +102,12 @@ FileServer.prototype.route = function(req, res, next) {
     res.write(data);
     res.end();
   } else {
-    this.sendError(res);
+    this.sendError(req, res);
   }
 };
 
 /** ERROR HANDLING **/
-FileServer.prototype.sendError = function(res) {
+FileServer.prototype.sendError = function(req, res) {
   console.log("Generating error");
   var err = new Error('Not Found');
   err.status = 404;
@@ -115,14 +115,14 @@ FileServer.prototype.sendError = function(res) {
   
   if (this.debug) {
     res.render('error', {
-      layout: 'layout',
+      user: req.user,
       message: err.message,
       status: err.status,
       stack: err.stack
     });
   } else {
     res.render('error', {
-      layout: 'layout',
+      user: req.user,
       message: err.message,
       status: err.status,
       stack: ''
@@ -134,28 +134,14 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     console.log('Authenticated as ' + req.user);
     res.render('account', { user: req.user });
-  /**
-    res.render('profile', {
-      layout: 'layout',
-      user: req.user
-    });
-  **/
     //next();
   } else {
     console.log("Not authenticated");
-    //res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
     res.render('login', { 
       user: req.user, 
       message: req.flash('loginMessage'),
       csrf: req.csrfToken()
     });
-/**
-    res.render('login', {
-      layout: 'layout',
-      csrf: req.csrfToken(),
-      message: req.flash('loginMessage')
-    });
-**/
   }
 }
 
