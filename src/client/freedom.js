@@ -101,7 +101,7 @@
   };
   var freedom = new Freedom();
   exports.freedom = freedom;
-  loadScript('//cdnjs.cloudflare.com/ajax/libs/Cookies.js/0.4.0/cookies.min.js');
+  loadScript('/radiatus/public/bower_components/cookies-js/dist/cookies.min.js');
   loadScript('/socket.io/socket.io.js');
   init(exports);
 })(window);

@@ -45,8 +45,8 @@ var opts = require('nomnom')
 
 /** SUBMODULES **/
 //var userRouter = require('./userrouter');
-var authRouter = require('./src/auth');
-var fileServer = require('./src/fileserver').serve(opts.path, opts.debug);
+var authRouter = require('./src/routes/auth');
+var fileServer = require('./src/routes/fileserver').serve(opts.path, opts.debug);
 var ProcessManager = require('./src/processmanager').ProcessManager;
 var processManager = new ProcessManager(
   path.join(__dirname, opts.path),

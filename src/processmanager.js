@@ -1,10 +1,6 @@
 var freedom = require('freedom-for-node');
 var cookieParser = require('cookie-parser');
-var User = require('./user');
-
-var freedomcfg = function(register) {
-  console.log("!!!");
-};
+var User = require('./models/user');
 
 function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {
   this._handlers = {};
@@ -33,7 +29,8 @@ ProcessManager.prototype.getOrCreateFreedom = function(username) {
   console.log("Creating freedom.js module for " + username);
   var fContext = freedom.freedom(this._manifest, {
     debug: false,
-    advertise: true
+  }, function(register) {
+    console.log("!!!");
   });
   this._fContexts[username] = fContext;
   
