@@ -1,39 +1,39 @@
 <% layout('layout') -%>
-<% if (message) { %>
-<p><%= message %></p>
-<% } %>
 
 <p>
   IMPORTANT: This is loaded over unencrypted HTTP. <br>
   DO NOT reuse passwords from other accounts.
 </p>
 
-<div class='row'>
+<% for (var i=0; i<message.length; i++) { %>
+  <small class="error"><%= message[i] %></small>
+<% } %>
 
+<div class='row'>
   <div class='large-6 columns shadedbox'>
-    <h2>Log in</h2>
     <form action='/radiatus/auth/login' method='post'>
+      <h3>Log in</h3>
       <input type='hidden' name='_csrf' value='<%= csrf %>'>
       <div class='row'>
         <div class='large-6 columns'>
-            <input type='text' name='username' placeholder='Username'>
+          <input type='text' name='username' placeholder='Username'>
         </div>
-      </div>
-      <div class='row'>
         <div class='large-6 columns'>
           <input type='password' name='password' placeholder='Password'>
         </div>
       </div>
       <div class='row'>
-        <div class='large-6 columns'>
-          <button class='submit'>Log in</button>
+        <div class='large-12 columns'>
+          <button class='submit'>Log In</button>
         </div>
       </div>
     </form>
   </div>
+</div>
 
+<div class='row'>
   <div class='large-6 columns shadedbox'>
-    <h2>Sign up for a new account</h2>
+    <h3>Sign up for a new account</h3>
     <form action='/radiatus/auth/signup' method='post'>
       <input type='hidden' name='_csrf' value='<%= csrf %>'>
       <div class='row'>

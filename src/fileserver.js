@@ -133,7 +133,7 @@ FileServer.prototype.sendError = function(res) {
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     console.log('Authenticated as ' + req.user);
-  res.render('account', { user: req.user });
+    res.render('account', { user: req.user });
   /**
     res.render('profile', {
       layout: 'layout',
@@ -143,7 +143,12 @@ function ensureAuthenticated(req, res, next) {
     //next();
   } else {
     console.log("Not authenticated");
-  res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
+    //res.render('login', { user: req.user, message: req.session.messages, csrf: req.csrfToken()});
+    res.render('login', { 
+      user: req.user, 
+      message: req.flash('loginMessage'),
+      csrf: req.csrfToken()
+    });
 /**
     res.render('login', {
       layout: 'layout',

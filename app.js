@@ -55,13 +55,11 @@ var processManager = new ProcessManager(
 );
 
 /** VIEW ENGINE **/
-// View engine setup (only for errors right now)
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
 app.engine('ejs', ejsLocals);
 
 /** LOGGER **/
-// Request logger
 if (opts.debug) {
   app.use(morgan('dev'));
 } else {
@@ -86,7 +84,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(csrf());
-//app.use(flash());
+app.use(flash());
 //io.set('authorization', processManager.onAuthorization.bind(processManager));
 
 /** ROUTES **/

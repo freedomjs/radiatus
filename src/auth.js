@@ -4,16 +4,22 @@ var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var User = require('./user');
 
-passport.use('local-login', new LocalStrategy(function(username, password, done) {
+passport.use('local-login', new LocalStrategy({
+  usernameField: 'username',
+  passwordField: 'password',
+  passReqToCallback: true
+}, function(req, username, password, done) {
   User.findOne({ username: username }, function(err, user) {
     if (err) { return done(err); }
-    if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
+    //if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
+    if (!user) { return done(null, false, req.flash('loginMessage', 'Incorrect username/password')); }
     user.comparePassword(password, function(err, isMatch) {
       if (err) return done(err);
       if(isMatch) {
         return done(null, user);
       } else {
-        return done(null, false, { message: 'Invalid password' });
+        //return done(null, false, { message: 'Invalid password' });
+        return done(null, false, req.flash('loginMessage', 'Incorrect username/password'));
       }
     });
   });
@@ -97,6 +103,11 @@ router.post('/login',
 // POST /login
 //   This is an alternative implementation that uses a custom callback to
 //   acheive the same functionality.
+
+
+
+
+/**
 router.post('/login', function(req, res, next) {
   passport.authenticate('local-login', function(err, user, info) {
     if (err) { return next(err) }
@@ -110,6 +121,12 @@ router.post('/login', function(req, res, next) {
     });
   })(req, res, next);
 });
+**/
+router.post('/login', passport.authenticate('local-login', { 
+  successRedirect: '/',
+  failureRedirect: '/radiatus/auth/login',
+  failureFlash: true
+}));
 
 /**
 
@@ -132,7 +149,8 @@ router.get('/account', ensureAuthenticated, function(req, res){
 router.get('/login', function(req, res){
   res.render('login', { 
     user: req.user,
-    message: req.session.messages, 
+    message: req.flash('loginMessage'),
+    //message: req.session.messages, 
     csrf: req.csrfToken()
   });
 });
