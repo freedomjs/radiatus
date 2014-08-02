@@ -49,6 +49,7 @@ var authRouter = require('./src/auth');
 var fileServer = require('./src/fileserver').serve(opts.path, opts.debug);
 var ProcessManager = require('./src/processmanager').ProcessManager;
 var processManager = new ProcessManager(
+  path.join(__dirname, opts.path),
   sessionStore, 
   cookieParser(config.sessionSecret),
   config.cookieKey
@@ -91,9 +92,7 @@ io.set('authorization', processManager.onAuthorization.bind(processManager));
 // socket.io endpoint
 // @TODO - user management
 io.on('connection', processManager.onConnection.bind(
-  processManager, 
-  'user', 
-  path.join(__dirname, opts.path)
+  processManager
 ));
 
 // User authentication
