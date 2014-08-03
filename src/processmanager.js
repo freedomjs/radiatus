@@ -113,7 +113,8 @@ ProcessManager.prototype.onConnection = function(socket) {
     this._handlers[username].setSocket(socket);
     
     socket.on('message', function(username, fContext, msg) {
-      console.log(username+':emit:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 100));
+      if (typeof msg.data == 'undefined') {console.log(username+':emit:'+msg.label);}
+      else {console.log(username+':emit:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 100));}
       fContext.emit(msg.label, msg.data);
     }.bind(this, username, fContext));
 
@@ -138,7 +139,8 @@ Handler.prototype.checkLabel = function(label) {
   return true;
 }; 
 Handler.prototype.processData = function(data) {
-  console.log(this._username+':on:'+this._label+':'+JSON.stringify(data).substr(0, 100));
+  if (typeof data == 'undefined') {console.log(this._username+':on:'+this._label);}
+  else {console.log(this._username+':on:'+this._label+':'+JSON.stringify(data).substr(0, 100));}
   this._socket.emit('message', {
     label: this._label,
     data: data
