@@ -42,7 +42,7 @@
       return;
     }
 
-    console.log('emit:'+label+':'+JSON.stringify(data));
+    console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 100));
     this._socket.emit('message', {
       label: label,
       data: data
@@ -72,7 +72,7 @@
 
   Freedom.prototype._onMessage = function(msg) {
     var label = msg.label;
-    console.log('on:' + msg.label+':'+JSON.stringify(msg.data));
+    console.log('on:' + msg.label+':'+JSON.stringify(msg.data).substr(0, 100));
     
     if (this._onCallbacks.hasOwnProperty(label)) {
       var callbacks = this._onCallbacks[label];
