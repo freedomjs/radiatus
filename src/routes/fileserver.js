@@ -102,6 +102,8 @@ FileServer.prototype.route = function(req, res, next) {
     res.write(data);
     res.end();
   } else {
+    console.log("404:"+req.url);
+    console.log(this.files);
     this.sendError(req, res);
   }
 };

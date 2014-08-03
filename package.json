@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node app.js demo/tictak/manifest.json -d",
     "debug": "supervisor -i node_modules/ -- app.js demo/tictak/manifest.json -d",
+    "counter": "supervisor -- app.js node_modules/freedom/demo/counter/manifest.json -d",
+    "tictak": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
+    "chat": "supervisor -- app.js node_modules/freedom/demo/chat/manifest.json -d",
+    "filedrop": "supervisor -- app.js node_modules/freedom/demo/filedrop/manifest.json -d",
     "test": "grunt test"
   },
   "repository": {
@@ -29,7 +33,7 @@
     "ejs": "~1.0.0",
     "socket.io": "~1.0.6",
     "freedom-for-node": "~0.1.2",
-    "freedom": "^0.5.2",
+    "freedom": "^0.5.3",
     "keygrip": "^1.0.1",
     "mime": "^1.2.11",
     "morgan": "^1.1.1",

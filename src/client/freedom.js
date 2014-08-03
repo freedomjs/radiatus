@@ -39,6 +39,7 @@
   Freedom.prototype.emit = function(label, data) {
     if (this._socket == null) {
       this._pushQueue('emit', label, data);
+      return;
     }
 
     console.log('emit:'+label+':'+JSON.stringify(data));
