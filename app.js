@@ -98,7 +98,7 @@ io.on('connection', processManager.onConnection.bind(
 // User authentication
 app.use('/radiatus/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
-app.use('/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
+app.use('*/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.all('/freedom/*', userRouter.route);
