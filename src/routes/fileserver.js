@@ -22,6 +22,14 @@ var FileServer = function(dbg) {
 };
 
 FileServer.prototype.serveModule = function(prefix, url) {
+  function removeRelativePrefix(str) {
+    while(str[0] == '.' || 
+          str[0] == '/') {
+      str = str.substr(1);
+    }
+    return str;
+  }
+
   fs.readFile(url, function(err, file) {
     if (err) {
       throw err;
@@ -47,7 +55,7 @@ FileServer.prototype.serveModule = function(prefix, url) {
     files.forEach(function(file) {
       var resolvedFile = path.resolve(path.dirname(url), file);
       var fileURL = path.join(prefix, file);
-      this.files[fileURL] = resolvedFile;
+      this.files[removeRelativePrefix(fileURL)] = resolvedFile;
     }.bind(this));
 
     // map dependencies
