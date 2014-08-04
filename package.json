@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js demo/tictak/manifest.json -d",
-    "debug": "supervisor -i node_modules/ -- app.js demo/tictak/manifest.json -d",
+    "debug": "supervisor -- app.js node_modules/researchreviews/radiatus-manifest.json -d",
     "counter": "supervisor -- app.js node_modules/freedom/demo/counter/manifest.json -d",
     "tictak": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
     "chat": "supervisor -- app.js node_modules/freedom/demo/chat/manifest.json -d",
