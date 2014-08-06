@@ -49,6 +49,7 @@
     "method-override": "~2.1.2",
     "mongodb": "~1.4.8",
     "bcrypt": "~0.7.8",
-    "ejs-locals": "~1.0.2"
+    "ejs-locals": "~1.0.2",
+    "ws": "^0.4.31"
   }
 }

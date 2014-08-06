@@ -31,6 +31,7 @@ ProcessManager.prototype.getOrCreateFreedom = function(username) {
     debug: false,
   }, function(register) {
     register('core.storage', require('./coreproviders/storage.js').bind({}, username));
+    register('core.websocket', require('./coreproviders/websocket.js').bind({}, username));
   });
   this._fContexts[username] = fContext;
   
