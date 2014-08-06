@@ -2,6 +2,7 @@
 /*jslint sloppy:true*/
 var config = require('../../config');
 var urlParser = require('url');
+var queryParser = require('querystring');
 
 /**
  * A WebSocket core provider for Radiatus
@@ -60,18 +61,10 @@ WS.prototype.rewriteUrl = function(url) {
     var toCheck = config.providerServers[i];
     if (url.substr(0, toCheck.url.length) == toCheck.url) {
       parsedUrl = urlParser.parse(url);
-      // require('url') has multiple cases to check for
-      if (parsedUrl.search == null) {
-        parsedUrl.search= '?secret' + '=' + toCheck.secret + '&username=' + this.username;
-      } else if (typeof parsedUrl.search == 'string' & parsedUrl.search == '') {
-        parsedUrl.search = '?secret' + '=' + toCheck.secret + '&username=' + this.username;
-      } else if (typeof parsedUrl.search == 'string') {
-        parsedUrl.search += '&secret' + '=' + toCheck.secret + '&username=' + this.username;
-      } else {
-        console.error("core.websockets: Error rewriting URL " + 
-                      url + " with " + JSON.stringify(toCheck));
-        return url;
-      }
+      parsedQuery = queryParser.parse(parsedUrl.query);
+      parsedQuery.radiatusSecret = toCheck.secret;
+      parsedQuery.radiatusUsername = this.username;
+      parsedUrl.search = '?' + queryParser.stringify(parsedQuery);
       return urlParser.format(parsedUrl);
     }
   }
