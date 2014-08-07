@@ -1,6 +1,6 @@
 {
   "name": "Radiatus",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Node web server for freedom.js apps",
   "main": "app.js",
   "scripts": {
