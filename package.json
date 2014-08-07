@@ -1,5 +1,5 @@
 {
-  "name": "Radiatus",
+  "name": "radiatus",
   "version": "0.0.1",
   "description": "Node web server for freedom.js apps",
   "main": "app.js",
