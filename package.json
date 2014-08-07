@@ -51,5 +51,12 @@
     "bcrypt": "~0.7.8",
     "ejs-locals": "~1.0.2",
     "ws": "^0.4.31"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-bump": "0.0.15",
+    "grunt-npm": "0.0.2"
   }
 }
