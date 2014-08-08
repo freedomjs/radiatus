@@ -21,7 +21,7 @@ var app = express();
 var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var config = require('./config');
+var config = require('config');
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
@@ -51,8 +51,8 @@ var ProcessManager = require('./src/processmanager').ProcessManager;
 var processManager = new ProcessManager(
   path.join(__dirname, opts.path),
   sessionStore, 
-  cookieParser(config.sessionSecret),
-  config.cookieKey
+  cookieParser(config.get('sessionSecret')),
+  config.get('cookieKey')
 );
 
 /** VIEW ENGINE **/
@@ -71,14 +71,14 @@ if (opts.debug) {
 app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 
 /** SESSIONS/COOKIES **/
-app.use(cookieParser(config.sessionSecret));
+app.use(cookieParser(config.get('sessionSecret')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
 app.use(session({
   store: sessionStore,
-  secret: config.sessionSecret,
-  name: config.cookieKey,
+  secret: config.get('sessionSecret'),
+  name: config.get('cookieKey'),
   resave: true,
   saveUninitialized: true
 }));

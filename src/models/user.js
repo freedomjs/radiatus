@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
-var config = require('../../config');
+var config = require('config');
 
-mongoose.connect(config.userDB);
+mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', console.error.bind(console, 'mongoose error:'));
 mongoose.connection.once('open', function callback() {
   console.log('mongoose connection online to userDB');
@@ -21,7 +21,7 @@ var userSchema = mongoose.Schema({
 // Bcrypt middleware - salt passwords
 userSchema.pre('save', function(next) {
 	if(!this.isModified('password')) return next();
-	bcrypt.genSalt(config.saltWorkFactor, function(err, salt) {
+	bcrypt.genSalt(config.get('saltWorkFactor'), function(err, salt) {
 		if(err) return next(err);
 		bcrypt.hash(this.password, salt, function(err, hash) {
 			if(err) return next(err);

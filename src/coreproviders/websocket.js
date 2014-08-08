@@ -1,6 +1,6 @@
 /*globals freedom:true, fdom, WebSocket, console, require*/
 /*jslint sloppy:true*/
-var config = require('../../config');
+var config = require('config');
 var urlParser = require('url');
 var queryParser = require('querystring');
 
@@ -52,13 +52,14 @@ var WS = function (username, module, dispatchEvent, url, protocols, socket) {
 };
 
 WS.prototype.rewriteUrl = function(url) {
-  if (typeof config.providerServers == 'undefined' || 
-      !Array.isArray(config.providerServers)) {
+  if (!config.has('providerServers') ||
+      !Array.isArray(config.get('providerServers'))) {
     return url;
   }
+  var servers = config.get('providerServers');
   
-  for (var i=0; i<config.providerServers.length; i++) {
-    var toCheck = config.providerServers[i];
+  for (var i=0; i<servers.length; i++) {
+    var toCheck = servers[i];
     if (url.substr(0, toCheck.url.length) == toCheck.url) {
       parsedUrl = urlParser.parse(url);
       parsedQuery = queryParser.parse(parsedUrl.query);

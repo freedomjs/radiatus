@@ -1,5 +1,5 @@
 keystore.db
-config.js
+config/production.json
 
 node_modules/
 public/bower_components/

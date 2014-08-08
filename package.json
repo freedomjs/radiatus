@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js demo/tictak/manifest.json -d",
-    "debug": "supervisor -- app.js node_modules/researchreviews/radiatus-manifest.json -d",
+    "debug": "supervisor -- app.js demo/tictak/manifest.json -d",
     "counter": "supervisor -- app.js node_modules/freedom/demo/counter/manifest.json -d",
     "tictak": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
     "chat": "supervisor -- app.js node_modules/freedom/demo/chat/manifest.json -d",
@@ -50,7 +50,8 @@
     "mongodb": "~1.4.8",
     "bcrypt": "~0.7.8",
     "ejs-locals": "~1.0.2",
-    "ws": "^0.4.31"
+    "ws": "^0.4.31",
+    "config": "^1.0.2"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

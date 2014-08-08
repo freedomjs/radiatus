@@ -2,10 +2,10 @@
 /*jslint indent:2,white:true,sloppy:true,node:true,nomen:true */
 
 var mongoose = require('mongoose');
-var config = require('../../config');
 
 /**
-mongoose.connect(config.userDB);
+var config = require('config');
+mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', console.error.bind(console, 'mongoose error:'));
 mongoose.connection.once('open', function callback() {
   console.log('mongoose connection online to userDB');
