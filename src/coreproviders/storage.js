@@ -34,7 +34,7 @@ Storage_node.prototype.keys = function(continuation) {
     var retValue = [];
     if (docs) {
       for (var i=0; i<docs.length; i++) {
-        retValue.push(docs.key);
+        retValue.push(docs[i].key);
       }
     }
     continuation(retValue);

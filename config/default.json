@@ -10,5 +10,24 @@
   "providerServers": [{
     "url": "ws://localhost:8082",
     "secret": "secret"
-  }]
+  }],
+  "log": {
+    "level": "trace",
+    "levels": {
+      "trace": 0,
+      "verbose": 1,
+      "debug": 2,
+      "info": 3,
+      "warn": 4,
+      "error": 5
+    },
+    "colors": {
+      "trace": "grey",
+      "verbose": "grey",
+      "debug": "blue",
+      "info": "green",
+      "warn": "yellow",
+      "error": "red"
+    }
+  }
 }

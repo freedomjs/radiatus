@@ -13,6 +13,7 @@ var session = require('express-session');
 var passport = require('passport');
 var csrf = require('csurf');
 var flash = require('connect-flash');
+var mongoose = require('mongoose');
 
 /** APPLICATION **/
 var app = express();
@@ -22,6 +23,15 @@ var sessionStore = new session.MemoryStore();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var config = require('config');
+var logger = require('./src/logger')('app.js');
+mongoose.connect(config.get('userDB'));
+mongoose.connection.on('error', function(logger, err) {
+  logger.error('Mongoose error:');
+  logger.error(err);
+}.bind(this, logger));
+mongoose.connection.once('open', function(logger) {
+  logger.info('Mongoose connection online to userDB');
+}.bind(this, logger));
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
@@ -105,5 +115,5 @@ app.use('/', fileServer);
 
 /** START 'ER UP**/
 http.listen(opts.port, function() {
-  console.log("Radiatus is running on port " + opts.port);
+  logger.info("Radiatus is running on port " + opts.port);
 });

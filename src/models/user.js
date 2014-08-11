@@ -1,12 +1,11 @@
+/**
+ * Mongoose model for a user account on the web server
+ **/
+
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var config = require('config');
-
-mongoose.connect(config.get('userDB'));
-mongoose.connection.on('error', console.error.bind(console, 'mongoose error:'));
-mongoose.connection.once('open', function callback() {
-  console.log('mongoose connection online to userDB');
-});
+var logger = require('../logger')('src/models/user.js');
 
 var userSchema = mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -20,6 +19,7 @@ var userSchema = mongoose.Schema({
 
 // Bcrypt middleware - salt passwords
 userSchema.pre('save', function(next) {
+  logger.trace('userSchema.pre(save...: enter');
 	if(!this.isModified('password')) return next();
 	bcrypt.genSalt(config.get('saltWorkFactor'), function(err, salt) {
 		if(err) return next(err);
@@ -33,6 +33,7 @@ userSchema.pre('save', function(next) {
 
 // Password verification
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
+  logger.trace('userSchema.methods.comparePassword: enter');
 	bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
 		if(err) return cb(err);
 		cb(null, isMatch);
