@@ -118,9 +118,10 @@
     if (scripts[i].src.indexOf('freedom.js') >= 0) {
       var txt = scripts[i].innerText;
       try {
-        freedom.config = JSON.parse(txt);
+        var parsedTxt = JSON.parse(txt);
+        freedom.config = parsedTxt;
       } catch (e) {
-        console.error(e);
+        //console.error(e);
       }
     }
   }

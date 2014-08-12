@@ -8,8 +8,11 @@ var path = require('path');
 var mime = require('mime');
 var express = require('express');
 var router = express.Router();
+var logger = require('../logger')('src/routes/fileserver.js');
 
 var FileServer = function(dbg) {
+  logger.trace('constructor: enter');
+
   this.files = {};
   this.manifests = {};
   this.index = null;
@@ -69,6 +72,7 @@ FileServer.prototype.serveModule = function(prefix, url) {
       }
     }
     this.manifests[resolvedURL] = manifest;
+
   }.bind(this));
 };
 
@@ -90,7 +94,7 @@ FileServer.prototype.route = function(req, res, next) {
   if (this.files[req.url]) {
     fs.readFile(this.files[req.url], {encoding: "binary"}, function(err, file) {
       if (err) {
-        console.error('Error reading ' + req.url + ':' + this.files[req.url] + " - " + err);
+        logger.warn('Error reading ' + req.url + ':' + this.files[req.url] + " - " + err);
         this.sendError(req, res);
         return;
       }
@@ -110,15 +114,14 @@ FileServer.prototype.route = function(req, res, next) {
     res.write(data);
     res.end();
   } else {
-    console.log("404:"+req.url);
-    console.log(this.files);
+    logger.debug("404:"+req.url);
     this.sendError(req, res);
   }
 };
 
 /** ERROR HANDLING **/
 FileServer.prototype.sendError = function(req, res) {
-  console.log("Generating error");
+  logger.warn("Generating error");
   var err = new Error('Not Found');
   err.status = 404;
   res.status(err.status);
@@ -142,11 +145,11 @@ FileServer.prototype.sendError = function(req, res) {
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    //console.log('Authenticated as ' + req.user);
+    //logger.trace('Authenticated as ' + req.user.username);
     //res.render('account', { user: req.user });
     next();
   } else {
-    console.log("Not authenticated");
+    logger.warn("Not authenticated");
     res.render('login', { 
       user: req.user, 
       message: req.flash('loginMessage'),
