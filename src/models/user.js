@@ -8,16 +8,19 @@ var config = require('config');
 var logger = require('../logger')('src/models/user.js');
 
 var userSchema = mongoose.Schema({
+  // Unique username
   username: { type: String, required: true, unique: true },
+  // Salted password
   password: { type: String, required: true},
-  //email: { type: String, required: true, unique: true },
+  // email: { type: String, required: true, unique: true },
+  // Name
   name: {
     familyName: String,
     givenName: String
   }
 });
 
-// Bcrypt middleware - salt passwords
+// Bcrypt middleware - salt passwords before saving
 userSchema.pre('save', function(next) {
   logger.trace('userSchema.pre(save...: enter');
 	if(!this.isModified('password')) return next();
@@ -31,7 +34,7 @@ userSchema.pre('save', function(next) {
 	}.bind(this));
 });
 
-// Password verification
+// Bcrypt middleware - password verification
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
   logger.trace('userSchema.methods.comparePassword: enter');
 	bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {

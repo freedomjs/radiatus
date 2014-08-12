@@ -1,16 +1,12 @@
 /*globals require,fdom:true*/
 /*jslint indent:2,white:true,sloppy:true,node:true,nomen:true */
 
-var mongoose = require('mongoose');
-
 /**
-var config = require('config');
-mongoose.connect(config.get('userDB'));
-mongoose.connection.on('error', console.error.bind(console, 'mongoose error:'));
-mongoose.connection.once('open', function callback() {
-  console.log('mongoose connection online to userDB');
-});
-**/
+ * core.storage provider for Radiatus runtime
+ * Backed by Mongoose/MongoDB
+ */
+
+var mongoose = require('mongoose');
 
 var keyValueSchema = mongoose.Schema({
   username: { type: String, required: true },

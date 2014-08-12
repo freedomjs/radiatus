@@ -13,10 +13,14 @@
     this._onCallbacks = {};
     this._onceCallbacks = {};
     this._queue = [];
+
+    this.config = {
+      debug: true
+    }
   }
 
   Freedom.prototype.on = function(label, callback) {
-    console.log('register:on:' + label);
+    if (this.config.debug) console.log('register:on:' + label);
     if (!this._onCallbacks.hasOwnProperty(label)) {
       this._onCallbacks[label] = [];
     }
@@ -29,7 +33,7 @@
   };
 
   Freedom.prototype.once = function(label, callback) {
-    console.log('once:' + label);
+    if (this.config.debug) console.log('once:' + label);
     if (!this._onceCallbacks.hasOwnProperty(label)) {
       this._onceCallbacks[label] = [];
     }
@@ -42,8 +46,10 @@
       return;
     }
 
-    if(typeof data == 'undefined') {console.log('emit:'+label);}
-    else {console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 100));}
+    if (this.config.debug) {
+      if(typeof data == 'undefined') {console.log('emit:'+label);}
+      else {console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 200));}
+    }
     this._socket.emit('message', {
       label: label,
       data: data
@@ -73,8 +79,10 @@
 
   Freedom.prototype._onMessage = function(msg) {
     var label = msg.label;
-    if (typeof msg.data == 'undefined') {console.log('on:'+msg.label);}
-    else {console.log('on:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 100));}
+    if (this.config.debug) {
+      if (typeof msg.data == 'undefined') {console.log('on:'+msg.label);}
+      else {console.log('on:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
+    }
     
     if (this._onCallbacks.hasOwnProperty(label)) {
       var callbacks = this._onCallbacks[label];
@@ -103,6 +111,20 @@
     //freedom._onSocket(exports.io());
   };
   var freedom = new Freedom();
+  
+  // Extract options
+  var scripts = document.getElementsByTagName('script');
+  for (var i=0; i<scripts.length; i++) {
+    if (scripts[i].src.indexOf('freedom.js') >= 0) {
+      var txt = scripts[i].innerText;
+      try {
+        freedom.config = JSON.parse(txt);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
   exports.freedom = freedom;
   loadScript('/radiatus/public/bower_components/cookies-js/dist/cookies.min.js');
   loadScript('/socket.io/socket.io.js');
