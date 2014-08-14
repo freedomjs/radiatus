@@ -34,7 +34,12 @@ var WS = function (username, module, dispatchEvent, url, protocols, socket) {
   this.dispatchEvent = dispatchEvent;
   var newUrl = this.rewriteUrl(url);
   try {
-    this.websocket = new WSImplementation(newUrl, protocols);
+    if (protocols) {
+      this.websocket = new WSImplementation(url, protocols);
+    } else {
+      this.websocket = new WSImplementation(url);
+    }
+    this.websocket.binaryType = 'arraybuffer';
   } catch (e) {
     var error = {};
     if (e instanceof SyntaxError) {
@@ -163,7 +168,7 @@ WS.prototype.onOpen = function(event) {
 WS.prototype.onMessage = function(event, flags) {
   var data = {};
   if (this.isNode && flags && flags.binary) {
-    data.buffer = new Uint8Array(event).buffer
+    data.buffer = new Uint8Array(event).buffer;
   } else if (this.isNode) {
     data.text = event;
   } else if (typeof ArrayBuffer !== 'undefined' && event.data instanceof ArrayBuffer) {
