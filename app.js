@@ -16,13 +16,17 @@ var flash = require('connect-flash');
 var mongoose = require('mongoose');
 
 /** APPLICATION **/
+var config = require('config');
 var app = express();
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
-var sessionStore = new session.MemoryStore();
+//var sessionStore = new session.MemoryStore();
+var MongoStore = require('connect-mongo')(session);
+var sessionStore = new MongoStore({
+  url: config.get('userDB')
+}); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var config = require('config');
 var logger = require('./src/logger')('app.js');
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {

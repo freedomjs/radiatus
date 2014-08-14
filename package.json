@@ -52,7 +52,8 @@
     "ejs-locals": "~1.0.2",
     "ws": "^0.4.31",
     "config": "^1.0.2",
-    "winston": "~0.7.3"
+    "winston": "~0.7.3",
+    "connect-mongo": "~0.4.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
