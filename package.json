@@ -31,7 +31,7 @@
     "express": "^4.5.1",
     "ejs": "~1.0.0",
     "socket.io": "~1.0.6",
-    "freedom-for-node": "~0.1.3",
+    "freedom-for-node": "~0.1.4",
     "freedom": "^0.5.4",
     "keygrip": "^1.0.1",
     "mime": "^1.2.11",

@@ -159,10 +159,15 @@ Handler.prototype.processData = function(userLogger, data) {
 // Convert them back before sending to freedom
 function replaceBuffers(data) {
   if (data instanceof Buffer) {
-    return toArrayBuffer(data);
+    return new Uint8Array(data).buffer;
   } else if (Array.isArray(data)) {
     return data.map(replaceBuffers);
   } else if (typeof data == 'object') {
+    for (var k in data) {
+      if (data.hasOwnProperty(k)) {
+        data[k] = replaceBuffers(data[k]);
+      }
+    }
     Object.keys(data).forEach(function(data, elt) {
       data[elt] = replaceBuffers(data[elt]);
     }.bind({}, data));
@@ -170,19 +175,6 @@ function replaceBuffers(data) {
   } else {
     return data;
   }
-}
-
-function toArrayBuffer(buffer) {
-  var ret = new Uint8Array(buffer).buffer;
-  return ret;
-  /**
-  var ab = new ArrayBuffer(buffer.length);
-  var view = new Uint8Array(ab);
-  for (var i = 0; i < buffer.length; ++i) {
-    view[i] = buffer[i];
-  }
-  return ab;
-  **/
 }
 
 module.exports.ProcessManager = ProcessManager;

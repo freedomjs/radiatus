@@ -35,9 +35,9 @@ var WS = function (username, module, dispatchEvent, url, protocols, socket) {
   var newUrl = this.rewriteUrl(url);
   try {
     if (protocols) {
-      this.websocket = new WSImplementation(url, protocols);
+      this.websocket = new WSImplementation(newUrl, protocols);
     } else {
-      this.websocket = new WSImplementation(url);
+      this.websocket = new WSImplementation(newUrl);
     }
     this.websocket.binaryType = 'arraybuffer';
   } catch (e) {
@@ -88,7 +88,6 @@ WS.prototype.rewriteUrl = function(url) {
       return urlParser.format(parsedUrl);
     }
   }
-
   return url;
 };
 
