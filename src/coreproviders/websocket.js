@@ -183,6 +183,7 @@ WS.prototype.onMessage = function(event, flags) {
 WS.prototype.onError = function(event) {
   // Nothing to pass on
   // See: http://stackoverflow.com/a/18804298/300539
+  console.error(event);
   this.dispatchEvent('onError');
 };
 
