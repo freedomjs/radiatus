@@ -18,12 +18,14 @@ var queryParser = require('querystring');
  */
 var WS = function (username, module, dispatchEvent, url, protocols, socket) {
   var WSImplementation = null;
+  this.isNode = false;
   if (typeof socket !== 'undefined') {
     WSImplementation = socket;
   } else if (typeof WebSocket !== 'undefined') {
     WSImplementation = WebSocket;
   } else if (typeof require !== 'undefined') {
     WSImplementation = require('ws');
+    this.isNode = true;
   } else {
     console.error('Platform does not support WebSocket');
   }
@@ -45,10 +47,22 @@ var WS = function (username, module, dispatchEvent, url, protocols, socket) {
     return;
   }
 
-  this.websocket.onopen = this.onOpen.bind(this);
-  this.websocket.onclose = this.onClose.bind(this);
-  this.websocket.onmessage = this.onMessage.bind(this);
-  this.websocket.onerror = this.onError.bind(this);
+  if (this.isNode) {
+    this.websocket.on('message', this.onMessage.bind(this));
+    this.websocket.on('open', this.onOpen.bind(this));
+    // node.js websocket implementation not compliant
+    this.websocket.on('close', this.onClose.bind(this, {
+      code: 0,
+      reason: 'UNKNOWN',
+      wasClean: true
+    }));
+    this.websocket.on('error', this.onError.bind(this));
+  } else {
+    this.websocket.onopen = this.onOpen.bind(this);
+    this.websocket.onclose = this.onClose.bind(this);
+    this.websocket.onmessage = this.onMessage.bind(this);
+    this.websocket.onerror = this.onError.bind(this);
+  }
 };
 
 WS.prototype.rewriteUrl = function(url) {
@@ -79,7 +93,16 @@ WS.prototype.send = function(data, continuation) {
 
   if (toSend) {
     try {
-      this.websocket.send(toSend);
+      // For node.js, we have to do weird buffer stuff
+      if (this.isNode && toSend instanceof ArrayBuffer) {
+        this.websocket.send(
+          new Uint8Array(toSend), 
+          { binary:true }, 
+          this.onError.bind(this)
+        );
+      } else {
+        this.websocket.send(toSend);
+      }
     } catch (e) {
       if (e instanceof SyntaxError) {
         errcode = "SYNTAX";
@@ -137,12 +160,16 @@ WS.prototype.onOpen = function(event) {
   this.dispatchEvent('onOpen');
 };
 
-WS.prototype.onMessage = function(event) {
+WS.prototype.onMessage = function(event, flags) {
   var data = {};
-  if (typeof ArrayBuffer !== 'undefined' && event.data instanceof ArrayBuffer) {
-    data.buffer = data;
+  if (this.isNode && flags && flags.binary) {
+    data.buffer = new Uint8Array(event).buffer
+  } else if (this.isNode) {
+    data.text = event;
+  } else if (typeof ArrayBuffer !== 'undefined' && event.data instanceof ArrayBuffer) {
+    data.buffer = event.data;
   } else if (typeof Blob !== 'undefined' && event.data instanceof Blob) {
-    data.binary = data;
+    data.binary = event.data;
   } else if (typeof event.data === 'string') {
     data.text = event.data;
   }

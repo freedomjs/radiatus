@@ -121,7 +121,9 @@ ProcessManager.prototype.onConnection = function(socket) {
     socket.on('message', function(username, fContext, userLogger, msg) {
       if (typeof msg.data == 'undefined') {userLogger.debug(username+':emit:'+msg.label);}
       else {userLogger.debug(username+':emit:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
-      fContext.emit(msg.label, msg.data);
+      // Need to place any instances of node.js Buffers
+      var newData = replaceBuffers(msg.data);
+      fContext.emit(msg.label, newData);
     }.bind(this, username, fContext, userLogger));
 
     socket.on('disconnect', function(username) {
@@ -153,5 +155,34 @@ Handler.prototype.processData = function(userLogger, data) {
   });
 };
 
+// Socket.io replaces all ArrayBuffers with node.js Buffer objects
+// Convert them back before sending to freedom
+function replaceBuffers(data) {
+  if (data instanceof Buffer) {
+    return toArrayBuffer(data);
+  } else if (Array.isArray(data)) {
+    return data.map(replaceBuffers);
+  } else if (typeof data == 'object') {
+    Object.keys(data).forEach(function(data, elt) {
+      data[elt] = replaceBuffers(data[elt]);
+    }.bind({}, data));
+    return data;
+  } else {
+    return data;
+  }
+}
+
+function toArrayBuffer(buffer) {
+  var ret = new Uint8Array(buffer).buffer;
+  return ret;
+  /**
+  var ab = new ArrayBuffer(buffer.length);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buffer.length; ++i) {
+    view[i] = buffer[i];
+  }
+  return ab;
+  **/
+}
 
 module.exports.ProcessManager = ProcessManager;
