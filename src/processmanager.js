@@ -1,5 +1,7 @@
 var freedom = require('freedom-for-node');
 var cookieParser = require('cookie-parser');
+var path = require('path');
+var fs = require('fs');
 var User = require('./models/user');
 var logger = require('./logger')('src/processmanager.js');
 
@@ -8,7 +10,7 @@ function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {
   this._handlers = {};
   this._fContexts = {};
 
-  this._manifest = manifest;
+  this._rootManifestPath = manifest;
   this._sessionStore = sessionStore;
   this._cookieParser = cookieParser;
   this._cookieKey = cookieKey;
@@ -20,18 +22,37 @@ ProcessManager.prototype.init = function() {
   User.find({}, function(err, docs) {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
-      //this.getOrCreateFreedom(u.username);
+      //this.getOrCreateFreedom(this._rootManifestPath, u.username);
     }
-  }.bind(this))
+  }.bind(this));
+
+  fs.readFile(this._rootManifestPath, function(err, file) {
+    if (err) throw err;
+    var manifest = JSON.parse(file);
+    if (manifest.services) {
+      for (var k in manifest.services) {
+        if (manifest.services.hasOwnProperty(k)) {
+          var service = manifest.services[k];
+          if (service.username && service.url) {
+            var servicePath = path.resolve(path.dirname(this._rootManifestPath), service.url);
+            this.getOrCreateFreedom(servicePath, service.username);
+          } else {
+            logger.error('init: failed to create service '+k+
+              ', missing username or url in manifest');
+          }
+        }
+      }
+    }
+  }.bind(this)); 
 };
 
-ProcessManager.prototype.getOrCreateFreedom = function(username) {
+ProcessManager.prototype.getOrCreateFreedom = function(manifest, username) {
   logger.trace('getOrCreateFreedom: enter');
   if (this._fContexts.hasOwnProperty(username)) {
     return this._fContexts[username];
   }
   logger.debug("Initializing freedom.js context for " + username);
-  var fContext = freedom.freedom(this._manifest, {
+  var fContext = freedom.freedom(manifest, {
     debug: false,
   }, function(register) {
     register('core.storage', require('./coreproviders/storage.js').bind({}, username));
@@ -113,7 +134,7 @@ ProcessManager.prototype.onConnection = function(socket) {
     }
 
     var username = user.username;
-    var fContext = this.getOrCreateFreedom(username);
+    var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
     this._handlers[username].setSocket(socket);
     logger.debug('onConnection: connected user='+username);
     
