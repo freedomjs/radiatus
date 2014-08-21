@@ -150,6 +150,7 @@ ProcessManager.prototype.onConnection = function(socket) {
     }.bind(this, username, fContext, userLogger));
 
     socket.on('disconnect', function(username) {
+      this._handlers[username].setSocket(null);
       logger.debug(username+':disconnected');
     }.bind(this, username));
 
@@ -172,10 +173,15 @@ Handler.prototype.checkLabel = function(label) {
 Handler.prototype.processData = function(userLogger, data) {
   if (typeof data == 'undefined') {userLogger.debug(this._username+':on:'+this._label);}
   else {userLogger.debug(this._username+':on:'+this._label+':'+JSON.stringify(data).substr(0, 100));}
-  this._socket.emit('message', {
-    label: this._label,
-    data: data
-  });
+
+  if (this._socket !== null) {
+    this._socket.emit('message', {
+      label: this._label,
+      data: data
+    });
+  } else {
+    userLogger.warn(this._username':on:'this._label+':message dropped, no socket');
+  }
 };
 
 // Socket.io replaces all ArrayBuffers with node.js Buffer objects
