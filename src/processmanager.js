@@ -180,7 +180,7 @@ Handler.prototype.processData = function(userLogger, data) {
       data: data
     });
   } else {
-    userLogger.warn(this._username':on:'this._label+':message dropped, no socket');
+    userLogger.warn(this._username+':on:'+this._label+':message dropped, no socket');
   }
 };
 
