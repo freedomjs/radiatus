@@ -17,12 +17,14 @@ function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {
   this.init();
 }
 
+// Currently no ability to suspend and wake on message
+// All containers must be up at all times
 ProcessManager.prototype.init = function() {
   logger.trace('init: enter')
   User.find({}, function(err, docs) {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
-      //this.getOrCreateFreedom(this._rootManifestPath, u.username);
+      this.getOrCreateFreedom(this._rootManifestPath, u.username);
     }
   }.bind(this));
 
