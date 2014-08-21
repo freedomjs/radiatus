@@ -56,10 +56,10 @@ ProcessManager.prototype.getOrCreateFreedom = function(manifest, username) {
   logger.debug("Initializing freedom.js context for " + username);
   var fContext = freedom.freedom(manifest, {
     debug: false,
-  }, function(register) {
+  }, function(username, register) {
     register('core.storage', require('./coreproviders/storage.js').bind({}, username));
     register('core.websocket', require('./coreproviders/websocket.js').bind({}, username));
-  });
+  }.bind(this, username));
   this._fContexts[username] = fContext;
   
   var handler = new Handler(username);
@@ -83,14 +83,14 @@ ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
     return;
   }
   
-  this._cookieParser(handshakeData, {}, function(err) {
+  this._cookieParser(handshakeData, {}, function(handshakeData, accept, err) {
     if (err) {
       logger.warn("onAuthorization: error parsing cookies");
       accept('COOKIE_PARSE_ERROR', false);
       return;
     }
     var sessionId = handshakeData.signedCookies[this._cookieKey]
-    this._sessionStore.load(sessionId, function(err, session) {
+    this._sessionStore.load(sessionId, function(handshakeData, accept, err, session) {
       if (err || !session) {
         logger.warn("onAuthorization: invalid session");
         accept('INVALID_SESSION', false);
@@ -107,9 +107,9 @@ ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
 
       logger.trace('onAuthorization: valid session, continuing');
       accept(null, true);
-    });
+    }.bind(this, handshakeData, accept));
 
-  }.bind(this));
+  }.bind(this, handshakeData, accept));
 };
 
 ProcessManager.prototype.onConnection = function(socket) {
