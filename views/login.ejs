@@ -1,10 +1,5 @@
 <% layout('layout') -%>
 
-<p>
-  IMPORTANT: This is loaded over unencrypted HTTP. <br>
-  DO NOT reuse passwords from other accounts.
-</p>
-
 <% for (var i=0; i<message.length; i++) { %>
   <small class="error"><%= message[i] %></small>
 <% } %>
@@ -29,6 +24,19 @@
       </div>
     </form>
   </div>
+
+  <div class='large-6 columns shadedbox'>
+    <span class="warning label">
+    <p>
+      IMPORTANT: <br>
+      * This is loaded over unencrypted HTTP. <br>
+      * DO NOT reuse passwords from other accounts. <br>
+      * This service is under active development. <br>
+      * Accounts and data may be cleared periodically.
+    </p>
+    </span>
+  </div>
+
 </div>
 
 <div class='row'>
