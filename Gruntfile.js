@@ -16,6 +16,20 @@ module.exports = function(grunt) {
       all: [ 'src/' ]
     },
     clean: [],
+    prompt: {
+      tagMessage: {
+        options: {
+          questions: [
+            {
+              config: 'bump.options.tagMessage',
+              type: 'input',
+              message: 'Enter a git tag message:',
+              default: 'v%VERSION%',
+            }
+          ]
+        }
+      }
+    },
     bump: {
       options: {
         files: ['package.json'],
@@ -43,6 +57,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jasmine-node');
   grunt.loadNpmTasks('grunt-jsdoc');
+  grunt.loadNpmTasks('grunt-prompt');
   grunt.loadNpmTasks('grunt-npm');
   grunt.loadNpmTasks('grunt-bump');
 
@@ -51,6 +66,9 @@ module.exports = function(grunt) {
       arg = 'patch';
     }
     grunt.task.run([
+      'build',
+      'test',
+      'prompt:tagMessage',
       'bump:'+arg,
       'npm-publish'
     ]);
