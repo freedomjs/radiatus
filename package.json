@@ -1,6 +1,6 @@
 {
   "name": "radiatus",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Node web server for freedom.js apps",
   "main": "app.js",
   "scripts": {
@@ -31,8 +31,8 @@
     "express": "^4.5.1",
     "ejs": "~1.0.0",
     "socket.io": "~1.0.6",
-    "freedom-for-node": "~0.1.4",
-    "freedom": "^0.5.4",
+    "freedom-for-node": "^0.2.1",
+    "freedom": "^0.6.6",
     "keygrip": "^1.0.1",
     "mime": "^1.2.11",
     "morgan": "^1.1.1",
@@ -57,9 +57,11 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-bump": "0.0.15",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-bump": "0.0.15",
+    "grunt-jasmine-node": "^0.2.1",
+    "grunt-jsdoc": "^0.5.7",
     "grunt-npm": "0.0.2"
   }
 }

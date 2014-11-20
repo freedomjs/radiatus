@@ -1,8 +1,11 @@
 keystore.db
 config/production.json
 
+generated/
+
 node_modules/
 public/bower_components/
 
 .*.swp
 npm-debug.log
+.DS_Store

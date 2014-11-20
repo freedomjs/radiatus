@@ -1,5 +1,21 @@
 module.exports = function(grunt) {
   grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+    jshint: {
+      grunt: [ 'Gruntfile.js' ],
+      src: [ 'config/**/*.js', 'src/**/*.js' ],
+      options: { jshintrc: true }
+    },
+    jsdoc: {
+      dist: {
+        src: [ 'src/**/*.js' ],
+        options: { destination: 'generated/doc' },
+      }
+    },
+    jasmine_node: {
+      all: [ 'src/' ]
+    },
+    clean: [],
     bump: {
       options: {
         files: ['package.json'],
@@ -23,6 +39,10 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-jasmine-node');
+  grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-npm');
   grunt.loadNpmTasks('grunt-bump');
 
@@ -35,7 +55,14 @@ module.exports = function(grunt) {
       'npm-publish'
     ]);
   });
-
-  grunt.registerTask('default', []);
-
+  
+  // Default tasks.
+  grunt.registerTask('build', [
+    'jshint',
+  ]);
+  grunt.registerTask('test', [
+    'jasmine_node',
+  ]);
+  
+  grunt.registerTask('default', ['build', 'test']);
 };
