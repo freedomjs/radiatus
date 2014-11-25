@@ -56,7 +56,7 @@ Storage_node.prototype.set = function(key, value, continuation) {
         value: value
       });
     } else {
-      retValue = doc.value
+      retValue = doc.value;
       doc.value = value;
     }
     doc.save(function(err) {

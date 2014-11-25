@@ -31,11 +31,11 @@ exports.getInstance = function(request, response) {
     
   } else {
     // No Cookie :(
-    cookies.set()
+    cookies.set();
   }
 };
 
 exports.route = function(req, res) {
-  console.log('got request for ', req.params[0])
+  console.log('got request for ', req.params[0]);
   res.end('whoo!');
 };

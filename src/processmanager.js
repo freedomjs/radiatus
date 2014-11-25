@@ -20,7 +20,7 @@ function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {
 // Currently no ability to suspend and wake on message
 // All containers must be up at all times
 ProcessManager.prototype.init = function() {
-  logger.trace('init: enter')
+  logger.trace('init: enter');
   User.find({}, function(err, docs) {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
@@ -89,7 +89,7 @@ ProcessManager.prototype.onAuthorization = function(handshakeData, accept) {
       accept('COOKIE_PARSE_ERROR', false);
       return;
     }
-    var sessionId = handshakeData.signedCookies[this._cookieKey]
+    var sessionId = handshakeData.signedCookies[this._cookieKey];
     this._sessionStore.load(sessionId, function(handshakeData, accept, err, session) {
       if (err || !session) {
         logger.warn("onAuthorization: invalid session");

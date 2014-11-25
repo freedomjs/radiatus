@@ -16,7 +16,7 @@
 
     this.config = {
       debug: true
-    }
+    };
   }
 
   Freedom.prototype.on = function(label, callback) {
@@ -41,7 +41,7 @@
   };
 
   Freedom.prototype.emit = function(label, data) {
-    if (this._socket == null) {
+    if (this._socket === null) {
       this._pushQueue('emit', label, data);
       return;
     }
@@ -78,6 +78,7 @@
   };
 
   Freedom.prototype._onMessage = function(msg) {
+    var i, callbacks;
     var label = msg.label;
     if (this.config.debug) {
       if (typeof msg.data == 'undefined') {console.log('on:'+msg.label);}
@@ -85,14 +86,14 @@
     }
     
     if (this._onCallbacks.hasOwnProperty(label)) {
-      var callbacks = this._onCallbacks[label];
-      for (var i=0; i<callbacks.length; i++) {
+      callbacks = this._onCallbacks[label];
+      for (i=0; i<callbacks.length; i++) {
         callbacks[i](msg.data);
       }
     }
     if (this._onceCallbacks.hasOwnProperty(label)) {
-      var callbacks = this._onceCallbacks[label];
-      for (var i=0; i<callbacks.length; i++) {
+      callbacks = this._onceCallbacks[label];
+      for (i=0; i<callbacks.length; i++) {
         callbacks[i](msg.data);
       }
       this._onceCallbacks[label] = [];
@@ -109,7 +110,7 @@
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
     exports.freedom._onSocket(exports.io('/?csrf='+csrfToken));
     //freedom._onSocket(exports.io());
-  };
+  }
   var freedom = new Freedom();
   
   // Extract options

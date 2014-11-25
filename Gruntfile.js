@@ -1,3 +1,17 @@
+/**
+ * Gruntfile for Radiatus
+ * Here are some common tasks:
+ *
+ * build:
+ *  - Run jshint
+ * test:
+ *  - Run all jasmine tests
+ * jsdoc:
+ *  - Generate jsdoc documentation
+ * release:
+ *  - Bump the version, tag the release, and publish to NPM
+ **/
+
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),

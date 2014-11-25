@@ -69,7 +69,7 @@ router.post('/signup', passport.authenticate('local-signup', {
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/radiatus/auth/login')
+  res.redirect('/radiatus/auth/login');
 }
 
 router.get('/account', ensureAuthenticated, function(req, res){
@@ -93,4 +93,4 @@ router.get('/*', function(req, res) {
   res.redirect('/radiatus/auth/account');
 });
 
-module.exports = router
+module.exports = router;
