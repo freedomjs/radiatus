@@ -5,7 +5,7 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var config = require('config');
-var logger = require('../logger')('src/models/user.js');
+var logger = require('../core/logger')('src/models/user.js');
 
 var userSchema = mongoose.Schema({
   // Unique username

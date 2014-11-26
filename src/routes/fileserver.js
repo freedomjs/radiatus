@@ -8,7 +8,7 @@ var path = require('path');
 var mime = require('mime');
 var express = require('express');
 var router = express.Router();
-var logger = require('../logger')('src/routes/fileserver.js');
+var logger = require('../core/logger')('src/routes/fileserver.js');
 
 var FileServer = function(dbg) {
   logger.trace('constructor: enter');

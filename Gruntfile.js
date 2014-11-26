@@ -30,20 +30,14 @@ module.exports = function(grunt) {
       all: [ 'src/' ]
     },
     clean: [],
-    prompt: {
-      tagMessage: {
-        options: {
-          questions: [
-            {
-              config: 'bump.options.tagMessage',
-              type: 'input',
-              message: 'Enter a git tag message:',
-              default: 'v%VERSION%',
-            }
-          ]
-        }
+    prompt: { tagMessage: { options: { questions: [
+      {
+        config: 'bump.options.tagMessage',
+        type: 'input',
+        message: 'Enter a git tag message:',
+        default: 'v%VERSION%',
       }
-    },
+    ]}}},
     bump: {
       options: {
         files: ['package.json'],
@@ -59,9 +53,7 @@ module.exports = function(grunt) {
     },
     'npm-publish': {
       options: {
-        // list of tasks that are required before publishing
         requires: [],
-        // if the workspace is dirty, abort publishing (to avoid publishing local changes)
         abortIfDirty: true,
       }
     }

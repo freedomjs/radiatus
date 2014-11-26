@@ -2,7 +2,7 @@ var freedom = require('freedom-for-node');
 var cookieParser = require('cookie-parser');
 var path = require('path');
 var fs = require('fs');
-var User = require('./models/user');
+var User = require('../models/user');
 var logger = require('./logger')('src/processmanager.js');
 
 function ProcessManager(manifest, sessionStore, cookieParser, cookieKey) {

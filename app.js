@@ -27,7 +27,7 @@ var sessionStore = new MongoStore({
 }); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var logger = require('./src/logger')('app.js');
+var logger = require('./src/core/logger')('app.js');
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {
   logger.error('Mongoose error:');
@@ -61,7 +61,7 @@ var opts = require('nomnom')
 //var userRouter = require('./userrouter');
 var authRouter = require('./src/routes/auth');
 var fileServer = require('./src/routes/fileserver').serve(opts.path, opts.debug);
-var ProcessManager = require('./src/processmanager').ProcessManager;
+var ProcessManager = require('./src/core/processmanager').ProcessManager;
 var processManager = new ProcessManager(
   path.join(__dirname, opts.path),
   sessionStore, 
