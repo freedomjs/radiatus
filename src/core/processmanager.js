@@ -2,7 +2,7 @@ var freedom = require('freedom-for-node');
 var path = require('path');
 var fs = require('fs');
 var User = require('../models/user');
-var logger = require('./logger')(path.basename(__filename));
+var logger = require('./logger').getLogger(path.basename(__filename));
 
 function ProcessManager(manifest) {
   logger.trace('constructor: enter');
@@ -42,6 +42,31 @@ ProcessManager.prototype.init = function() {
       }
     }
   }.bind(this)); 
+};
+
+ProcessManager.prototype.addSocket = function(username, socket) {
+  socket.on('init', function(msg) {
+    console.log(msg);
+  });
+  /**
+  var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
+  this._handlers[username].setSocket(socket);
+  logger.debug('onConnection: connected user='+username);
+  
+  var userLogger = require('./logger')(username);
+  socket.on('message', function(username, fContext, userLogger, msg) {
+    if (typeof msg.data == 'undefined') {userLogger.debug(username+':emit:'+msg.label);}
+    else {userLogger.debug(username+':emit:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
+    // Need to place any instances of node.js Buffers
+    var newData = replaceBuffers(msg.data);
+    fContext.emit(msg.label, newData);
+  }.bind(this, username, fContext, userLogger));
+
+  socket.on('disconnect', function(username) {
+    this._handlers[username].setSocket(null);
+    logger.debug(username+':disconnected');
+  }.bind(this, username));
+  **/
 };
 
 ProcessManager.prototype.getOrCreateFreedom = function(manifest, username) {
@@ -119,4 +144,13 @@ function replaceBuffers(data) {
   }
 }
 
+var processManager;
+module.exports.initialize = function(manifest) {
+  if (typeof processManager !== "undefined") {
+    return processManager;
+  }
+  processManager = new ProcessManager(manifest);
+  module.exports.singleton = processManager;
+  return processManager;
+};
 module.exports.ProcessManager = ProcessManager;

@@ -28,4 +28,4 @@ function getLogger(name) {
   return logger;
 }
 
-module.exports = getLogger;
+module.exports.getLogger = getLogger;

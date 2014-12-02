@@ -27,7 +27,7 @@ var sessionStore = new MongoStore({
 }); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var logger = require('./src/core/logger')(path.basename(__filename));
+var logger = require('./src/core/logger').getLogger(path.basename(__filename));
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {
   logger.error('Mongoose error:');
@@ -58,17 +58,16 @@ var opts = require('nomnom')
   .parse();
 
 /** SUBMODULES **/
-//var userRouter = require('./userrouter');
-var authRouter = require('./src/routes/auth');
-var fileServer = require('./src/routes/fileserver').serve(opts.path, opts.debug);
-var SocketHandler = new require("./src/routes/socket").SocketHandler;
-var socketHandler = new SocketHandler(
+var processManager = require('./src/core/processmanager').initialize(
+  path.join(__dirname, opts.path)
+);
+var authRouter = require('./src/routes/auth').router;
+var fileServer = require('./src/routes/fileserver').initialize(opts.path, opts.debug);
+var socketHandler = new require("./src/routes/socket").initialize(
   sessionStore, 
   cookieParser(config.get('sessionSecret')),
   config.get('cookieKey')
 );
-var ProcessManager = require('./src/core/processmanager').ProcessManager;
-var processManager = new ProcessManager(path.join(__dirname, opts.path));
 
 /** VIEW ENGINE **/
 app.set('views', path.join(__dirname, './views'));

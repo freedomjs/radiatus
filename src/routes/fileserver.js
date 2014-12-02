@@ -3,12 +3,11 @@
  * - Takes in a root module's manifest file and
  *   serves all relevant files in the dependency tree
  **/
-var fs = require('fs');
-var path = require('path');
-var mime = require('mime');
-var express = require('express');
-var router = express.Router();
-var logger = require('../core/logger')('src/routes/fileserver.js');
+var fs = require("fs");
+var path = require("path");
+var mime = require("mime");
+var express = require("express");
+var logger = require("../core/logger").getLogger(path.basename(__filename));
 
 var FileServer = function(dbg) {
   logger.trace('constructor: enter');
@@ -150,17 +149,28 @@ function ensureAuthenticated(req, res, next) {
     next();
   } else {
     logger.warn("Not authenticated");
-    res.render('login', { 
+    res.render("login", { 
       user: req.user, 
-      message: req.flash('loginMessage'),
+      message: req.flash("loginMessage"),
       csrf: req.csrfToken()
     });
   }
 }
 
-module.exports.serve = function(manifest, debug) {
-  var server = new FileServer(debug);
+/**
+ * This module is a Singleton
+ **/
+var router;
+var server;
+module.exports.initialize = function(manifest, debug) {
+  if (typeof router !== "undefined") {
+    return router;
+  }
+
+  router = express.Router();
+  server = new FileServer(debug);
   server.serveModule('./', manifest);
   router.get('*', ensureAuthenticated, server.route.bind(server));
+  module.exports.router = router;
   return router;
 };

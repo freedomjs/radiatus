@@ -1,5 +1,7 @@
 var path = require("path");
-var logger = require("../core/logger")(path.basename(__filename));
+var logger = require("../core/logger").getLogger(path.basename(__filename));
+var User = require('../models/user');
+var processManager = require("../core/processmanager").singleton;
 
 var SocketHandler = function(sessionStore, cookieParser, cookieKey) {
   this._sessionStore = sessionStore;
@@ -59,10 +61,6 @@ SocketHandler.prototype.onConnection = function(socket) {
   } 
 
   var id = socket.conn.request.session.passport.user;
-  socket.on('init', function(msg) {
-    console.log(msg);
-  });
-  /**
   User.findById(id, function(socket, err, user) {
     if (err) {
       logger.warn('onConnection: error finding user');
@@ -71,26 +69,21 @@ SocketHandler.prototype.onConnection = function(socket) {
     }
 
     var username = user.username;
-    var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
-    this._handlers[username].setSocket(socket);
-    logger.debug('onConnection: connected user='+username);
-    
-    var userLogger = require('./logger')(username);
-    socket.on('message', function(username, fContext, userLogger, msg) {
-      if (typeof msg.data == 'undefined') {userLogger.debug(username+':emit:'+msg.label);}
-      else {userLogger.debug(username+':emit:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
-      // Need to place any instances of node.js Buffers
-      var newData = replaceBuffers(msg.data);
-      fContext.emit(msg.label, newData);
-    }.bind(this, username, fContext, userLogger));
-
-    socket.on('disconnect', function(username) {
-      this._handlers[username].setSocket(null);
-      logger.debug(username+':disconnected');
-    }.bind(this, username));
-
+    processManager.addSocket(username, socket);
   }.bind(this, socket));
-  **/
 };
 
+/**
+ * Keep a singleton
+ **/
+var socketHandler;
+module.exports.initialize = function(sessionStore, cookieParser, cookieKey) {
+  if (typeof socketHandler !== "undefined") {
+    return socketHandler;
+  }
+
+  socketHandler = new SocketHandler(sessionStore, cookieParser, cookieKey);
+  module.exports.singleton = socketHandler;
+  return socketHandler;
+};
 module.exports.SocketHandler = SocketHandler;

@@ -93,4 +93,4 @@ router.get('/*', function(req, res) {
   res.redirect('/radiatus/auth/account');
 });
 
-module.exports = router;
+module.exports.router = router;
