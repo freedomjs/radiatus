@@ -4,8 +4,8 @@
   "description": "Node web server for freedom.js apps",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js demo/counter/manifest.json -d",
-    "debug": "supervisor -- app.js demo/tictak/manifest.json -d",
+    "start": "node app.js node_modules/freedom/demo/counter/manifest.json -d",
+    "debug": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
     "counter": "supervisor -- app.js node_modules/freedom/demo/counter/manifest.json -d",
     "tictak": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
     "chat": "supervisor -- app.js node_modules/freedom/demo/chat/manifest.json -d",

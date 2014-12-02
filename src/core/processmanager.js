@@ -24,7 +24,7 @@ ProcessManager.prototype.init = function() {
   User.find({}, function(err, docs) {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
-      this.getOrCreateFreedom(this._rootManifestPath, u.username);
+      //this.getOrCreateFreedom(this._rootManifestPath, u.username);
     }
   }.bind(this));
 
@@ -37,7 +37,7 @@ ProcessManager.prototype.init = function() {
           var service = manifest.services[k];
           if (service.username && service.url) {
             var servicePath = path.resolve(path.dirname(this._rootManifestPath), service.url);
-            this.getOrCreateFreedom(servicePath, service.username);
+            ///this.getOrCreateFreedom(servicePath, service.username);
           } else {
             logger.error('init: failed to create service '+k+
               ', missing username or url in manifest');
