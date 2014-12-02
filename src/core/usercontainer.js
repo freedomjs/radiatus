@@ -1,32 +1,26 @@
 var path = require("path");
+var Q = require("q");
+var fs = require("fs");
 var util = require("./util");
+var Provider = require("freedom/src/provider");
+var Consumer = require("freedom/src/consumer");
 
-var StatusEnum = {
-  "OFFLINE": 0,
-  "STARTING": 1,
-  "ONLINE": 2
-};
-
-var BehaviorEnum = {
-  "ALWAYS": 0,
-  "WHEN_CONNECTED": 1
-};
-
-var UserContainer = function(name, manifest, defaultBehavior) {
-  this.logger = require("../core/logger").getLogger(path.basename(__filename) + ':' + name);
+var UserContainer = function(name, manifest) {
+  this.logger = require("../core/logger").getLogger(path.basename(__filename) + ":" + name);
   this.logger.trace("constructor: enter");
 
   this._name = name;
   this._manifest = manifest;
-  this._module = null;
   this._sockets = [];
-  this._status = "OFFLINE";
   if (typeof defaultBehavior !== "undefined" &&
       BehaviorEnum.hasOwnProperty(defaultBehavior)) {
     this._behavior = defaultBehavior;
   } else {
     this._behavior = "ALWAYS";
   }
+  this._manifestJson = null;
+  this._moduleConstructor = null;
+  this._initialize();
 };
 
 UserContainer.prototype.getStatus = function() {
@@ -34,13 +28,23 @@ UserContainer.prototype.getStatus = function() {
 };
 
 UserContainer.prototype.addSocket = function(socket) {
-  logger.trace("addSocket: enter");
-
+  this.logger.trace("addSocket: enter");
+  this._sockets.push(socket);
   socket.on("init", function(msg) {
     
     console.log(msg);
   });
 /**
+ * 
+  var handler = new Handler(username);
+  this._handlers[username] = handler;
+    
+  var userLogger = require("./logger")(username);
+  fContext.on(
+    handler.checkLabel.bind(handler),
+    handler.processData.bind(handler, userLogger)
+  );
+
   var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
   this._handlers[username].setSocket(socket);
   logger.debug("onConnection: connected user="+username);
@@ -62,30 +66,25 @@ UserContainer.prototype.addSocket = function(socket) {
 
 };
 
-UserContainer.prototype.getOrCreateFreedom = function(manifest, username) {
-  logger.trace("getOrCreateFreedom: enter");
-  if (this._fContexts.hasOwnProperty(username)) {
-    return this._fContexts[username];
+UserContainer.prototype._initialize = function() {
+  this.logger.trace("_initialize: enter");
+  if (this._manifestJson === null) {
+    fs.readFile(this._manifest, function(err, file) {
+      if (err) throw err;
+      this._manifestJson = JSON.parse(file);
+    }.bind(this));
   }
-  logger.debug("Initializing freedom.js context for " + username);
-  var fContext = freedom.freedom(manifest, {
-    debug: false,
-  }, function(username, register) {
-    register("core.storage", require("./coreproviders/storage.js").bind({}, username));
-    register("core.websocket", require("./coreproviders/websocket.js").bind({}, username));
-  }.bind(this, username));
-  this._fContexts[username] = fContext;
-  
-  var handler = new Handler(username);
-  this._handlers[username] = handler;
-    
-  var userLogger = require("./logger")(username);
-  fContext.on(
-    handler.checkLabel.bind(handler),
-    handler.processData.bind(handler, userLogger)
-  );
 
-  return fContext;
+  if (this._moduleConstructor === null) {
+    this.logger.debug("_startModule: Initializing freedom.js root module");
+    freedom.freedom(this._manifest, {
+    }, function(constructor) {
+      this.logger.debug("_startModule: freedom.js module created");
+      this._moduleConstructor = constructor;
+    }.bind(this));
+    //register("core.storage", require("./coreproviders/storage.js").bind({}, username));
+    //register("core.websocket", require("./coreproviders/websocket.js").bind({}, username));
+  }
 };
 
 

@@ -1,4 +1,5 @@
 (function(exports) {
+  var DEBUG = true;
   //Load JavaScript libraries
   function loadScript(url) {
     var script = document.createElement('script');
@@ -13,14 +14,10 @@
     this._onCallbacks = {};
     this._onceCallbacks = {};
     this._queue = [];
-
-    this.config = {
-      debug: true
-    };
   }
 
   Freedom.prototype.on = function(label, callback) {
-    if (this.config.debug) console.log('register:on:' + label);
+    if (DEBUG) console.log('register:on:' + label);
     if (!this._onCallbacks.hasOwnProperty(label)) {
       this._onCallbacks[label] = [];
     }
@@ -33,7 +30,7 @@
   };
 
   Freedom.prototype.once = function(label, callback) {
-    if (this.config.debug) console.log('once:' + label);
+    if (DEBUG) console.log('once:' + label);
     if (!this._onceCallbacks.hasOwnProperty(label)) {
       this._onceCallbacks[label] = [];
     }
@@ -46,7 +43,7 @@
       return;
     }
 
-    if (this.config.debug) {
+    if (DEBUG) {
       if(typeof data == 'undefined') {console.log('emit:'+label);}
       else {console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 200));}
     }
@@ -80,7 +77,7 @@
   Freedom.prototype._onMessage = function(msg) {
     var i, callbacks;
     var label = msg.label;
-    if (this.config.debug) {
+    if (DEBUG) {
       if (typeof msg.data == 'undefined') {console.log('on:'+msg.label);}
       else {console.log('on:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
     }
@@ -124,12 +121,13 @@
       }
       return;
     }
+    if (DEBUG) console.log('freedom.js: Initializing connection to server');
     // Create socket to the server
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
     var socket = exports.io("/?csrf=" + csrfToken);
     // Get initialization information from the server
     socket.on("init", function(resolve, reject, msg) {
-      console.log(msg);
+      if (DEBUG) { console.log(msg); }
     }.bind({}, resolve, reject));
     socket.emit("init", {
       manifest: manifest,
