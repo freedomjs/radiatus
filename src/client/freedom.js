@@ -1,5 +1,5 @@
 (function(exports) {
-  //Load socket.io client library
+  //Load JavaScript libraries
   function loadScript(url) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
@@ -111,22 +111,8 @@
     exports.freedom._onSocket(exports.io('/?csrf='+csrfToken));
     //freedom._onSocket(exports.io());
   }
-  var freedom = new Freedom();
   
-  // Extract options
-  var scripts = document.getElementsByTagName('script');
-  for (var i=0; i<scripts.length; i++) {
-    if (scripts[i].src.indexOf('freedom.js') >= 0) {
-      var txt = scripts[i].innerText;
-      try {
-        var parsedTxt = JSON.parse(txt);
-        freedom.config = parsedTxt;
-      } catch (e) {
-        //console.error(e);
-      }
-    }
-  }
-
+  var freedom = new Freedom();
   exports.freedom = freedom;
   loadScript('/radiatus/public/bower_components/cookies-js/dist/cookies.min.js');
   loadScript('/socket.io/socket.io.js');

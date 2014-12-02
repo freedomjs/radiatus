@@ -27,7 +27,7 @@ var sessionStore = new MongoStore({
 }); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var logger = require('./src/core/logger')('app.js');
+var logger = require('./src/core/logger')(path.basename(__filename));
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {
   logger.error('Mongoose error:');
@@ -61,13 +61,14 @@ var opts = require('nomnom')
 //var userRouter = require('./userrouter');
 var authRouter = require('./src/routes/auth');
 var fileServer = require('./src/routes/fileserver').serve(opts.path, opts.debug);
-var ProcessManager = require('./src/core/processmanager').ProcessManager;
-var processManager = new ProcessManager(
-  path.join(__dirname, opts.path),
+var SocketHandler = new require("./src/routes/socket").SocketHandler;
+var socketHandler = new SocketHandler(
   sessionStore, 
   cookieParser(config.get('sessionSecret')),
   config.get('cookieKey')
 );
+var ProcessManager = require('./src/core/processmanager').ProcessManager;
+var processManager = new ProcessManager(path.join(__dirname, opts.path));
 
 /** VIEW ENGINE **/
 app.set('views', path.join(__dirname, './views'));
@@ -100,15 +101,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(csrf());
 app.use(flash());
-io.set('authorization', processManager.onAuthorization.bind(processManager));
+io.set('authorization', socketHandler.onAuthorization.bind(socketHandler));
 
 /** ROUTES **/
 // socket.io endpoint
-// @TODO - user management
-io.on('connection', processManager.onConnection.bind(
-  processManager
-));
-
+io.on('connection', socketHandler.onConnection.bind(socketHandler));
 // User authentication
 app.use('/radiatus/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
