@@ -1,5 +1,5 @@
 var path = require("path");
-var logger = require("../core/logger").getLogger(path.basename(__filename));
+var util = require("./util");
 
 var StatusEnum = {
   "OFFLINE": 0,
@@ -13,6 +13,9 @@ var BehaviorEnum = {
 };
 
 var UserContainer = function(name, manifest, defaultBehavior) {
+  this.logger = require("../core/logger").getLogger(path.basename(__filename) + ':' + name);
+  this.logger.trace("constructor: enter");
+
   this._name = name;
   this._manifest = manifest;
   this._module = null;
@@ -26,9 +29,15 @@ var UserContainer = function(name, manifest, defaultBehavior) {
   }
 };
 
+UserContainer.prototype.getStatus = function() {
+  return this._status;
+};
+
 UserContainer.prototype.addSocket = function(socket) {
+  logger.trace("addSocket: enter");
 
   socket.on("init", function(msg) {
+    
     console.log(msg);
   });
 /**
@@ -41,7 +50,7 @@ UserContainer.prototype.addSocket = function(socket) {
     if (typeof msg.data == "undefined") {userLogger.debug(username+":emit:"+msg.label);}
     else {userLogger.debug(username+":emit:"+msg.label+":"+JSON.stringify(msg.data).substr(0, 200));}
     // Need to place any instances of node.js Buffers
-    var newData = replaceBuffers(msg.data);
+    var newData = util.replaceBuffers(msg.data);
     fContext.emit(msg.label, newData);
   }.bind(this, username, fContext, userLogger));
 
@@ -105,28 +114,5 @@ Handler.prototype.processData = function(userLogger, data) {
     userLogger.warn(this._username+":on:"+this._label+":message dropped, no socket");
   }
 };
-// Socket.io replaces all ArrayBuffers with node.js Buffer objects
-// Convert them back before sending to freedom
-function replaceBuffers(data) {
-  if (data instanceof Buffer) {
-    return new Uint8Array(data).buffer;
-  } else if (Array.isArray(data)) {
-    return data.map(replaceBuffers);
-  } else if (typeof data == "object") {
-    for (var k in data) {
-      if (data.hasOwnProperty(k)) {
-        data[k] = replaceBuffers(data[k]);
-      }
-    }
-    Object.keys(data).forEach(function(data, elt) {
-      data[elt] = replaceBuffers(data[elt]);
-    }.bind({}, data));
-    return data;
-  } else {
-    return data;
-  }
-}
-
-
 
 module.exports.UserContainer = UserContainer;

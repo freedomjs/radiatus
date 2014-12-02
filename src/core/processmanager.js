@@ -16,9 +16,9 @@ function ProcessManager(manifest) {
 
 ProcessManager.prototype.getOrCreateUser = function(username) {
   if (!this._userContainers.hasOwnProperty(username)) {
+    logger.trace('getOrCreateUser: creating user container ' + username);
     this._userContainers[username] = new UserContainer(username, this._defaultManifest, "ALWAYS");
   }
-
   return this._userContainers[username];
 };
 
@@ -27,6 +27,7 @@ ProcessManager.prototype.getServiceUser = function(name) {
 };
 
 ProcessManager.prototype.addSocket = function(username, socket) {
+  logger.trace('addSocket: username=' + username);
   var container = this.getOrCreateUser(username);
   container.addSocket(socket);
 };
@@ -40,6 +41,7 @@ ProcessManager.prototype._init = function() {
     for (var i=0; i<docs.length; i++) {
       var u = docs[i];
       this.getOrCreateUser(u.username);
+      logger.trace('_init: creating user container=' + u.username);
     }
   }.bind(this));
 
@@ -54,8 +56,9 @@ ProcessManager.prototype._init = function() {
           if (service.username && service.url) {
             var servicePath = path.resolve(path.dirname(this._defaultManifest), service.url);
             this._serviceUsers[service.username] = new UserContainer(service.username, servicePath, "ALWAYS");
+            logger.trace('_init: creating service user=' + service.username);
           } else {
-            logger.error("init: failed to create service "+k+
+            logger.error("_init: failed to create service "+k+
               ", missing username or url in manifest");
           }
         }
