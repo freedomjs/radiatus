@@ -1,34 +1,35 @@
 var path = require("path");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
-var User = require('../models/user');
+var User = require("../models/user");
 var processManager = require("../core/processmanager").singleton;
 
 var SocketHandler = function(sessionStore, cookieParser, cookieKey) {
+  logger.trace("constructor: enter");
   this._sessionStore = sessionStore;
   this._cookieParser = cookieParser;
   this._cookieKey = cookieKey;
 };
 
 SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
-  logger.trace('onAuthorization: enter');
+  logger.trace("onAuthorization: enter");
 
   if (!(handshakeData && handshakeData._query && handshakeData._query.csrf)) {
     logger.warn("onAuthorization: missing csrf token");
-    accept('MISSING_CSRF', false);
+    accept("MISSING_CSRF", false);
     return;
   }
   
   this._cookieParser(handshakeData, {}, function(handshakeData, accept, err) {
     if (err) {
       logger.warn("onAuthorization: error parsing cookies");
-      accept('COOKIE_PARSE_ERROR', false);
+      accept("COOKIE_PARSE_ERROR", false);
       return;
     }
     var sessionId = handshakeData.signedCookies[this._cookieKey];
     this._sessionStore.load(sessionId, function(handshakeData, accept, err, session) {
       if (err || !session) {
         logger.warn("onAuthorization: invalid session");
-        accept('INVALID_SESSION', false);
+        accept("INVALID_SESSION", false);
         return;
       }
       var token = handshakeData._query.csrf;
@@ -36,11 +37,11 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
 
       if (session.customCSRF !== token) {
         logger.warn("onAuthorization: invalid csrf token");
-        accept('INVALID_CSRFTOKEN', false);
+        accept("INVALID_CSRFTOKEN", false);
         return;
       }
 
-      logger.trace('onAuthorization: valid session, continuing');
+      logger.trace("onAuthorization: valid session, continuing");
       accept(null, true);
     }.bind(this, handshakeData, accept));
 
@@ -48,7 +49,7 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
 };
 
 SocketHandler.prototype.onConnection = function(socket) {
-  logger.trace('onConnection: enter');
+  logger.trace("onConnection: enter");
   console.log(socket.conn.request.session);
   console.log(socket.handshake.headers.cookie);
 
@@ -56,14 +57,14 @@ SocketHandler.prototype.onConnection = function(socket) {
       !socket.conn.request.session ||
       !socket.conn.request.session.passport ||
       !socket.conn.request.session.passport.user) {
-    logger.warn('onConnection: unrecognized user');
+    logger.warn("onConnection: unrecognized user");
     return;
   } 
 
   var id = socket.conn.request.session.passport.user;
   User.findById(id, function(socket, err, user) {
     if (err) {
-      logger.warn('onConnection: error finding user');
+      logger.warn("onConnection: error finding user");
       logger.warn(err);
       return;
     }

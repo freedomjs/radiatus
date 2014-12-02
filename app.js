@@ -2,6 +2,7 @@
  * Radiatus Entry
  **/
 
+/** IMPORTS **/
 var path = require('path');
 var express = require('express');
 var ejsLocals = require('ejs-locals');
@@ -15,7 +16,7 @@ var csrf = require('csurf');
 var flash = require('connect-flash');
 var mongoose = require('mongoose');
 
-/** APPLICATION **/
+/** EXPRESS APPLICATION **/
 var config = require('config');
 var app = express();
 // For alternatives, see
