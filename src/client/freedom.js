@@ -56,7 +56,7 @@
     });
   };
   
-  Freedom.prototype._onSocket = function(socket) {
+  Freedom.prototype.setSocket= function(socket) {
     this._socket = socket;
     this._socket.on('message', this._onMessage.bind(this));
     this._flushQueue();
@@ -100,21 +100,53 @@
     }
   };
 
-  function init(exports) {
-    // Need to wait until socket.io has fully loaded
-    if (typeof exports.io == 'undefined' || 
-        typeof exports.Cookies == 'undefined') {
-      setTimeout(init.bind(this, exports), 0);
+  /**
+   * Initialization code for the client stub.
+   * This will get retried every 10ms until the dependencies
+   * are loaded or the retry limit is reached.
+   *
+   * @param {Object} exports - global (usually window)
+   * @param {String} manifest - path to the manifest of the root freedom.js module
+   * @param {Object} options - freedom.js options
+   * @param {Function} resolve - function to call to resolve the freedom Promise
+   * @param {Function} reject - function to call to reject the freedom Promise
+   * @param {Number} retries - number of retries left for init
+   **/
+  function init(exports, manifest, options, resolve, reject, retries) {
+    // Need to wait until dependencies have fully loaded
+    if (typeof exports.io == "undefined" || 
+        typeof exports.Cookies == "undefined" ||
+        typeof exports.Promise == "undefined") {
+      if (retries > 0) {
+        setTimeout(init.bind({}, exports, manifest, options, resolve, reject, (retries-1)), 10);
+      } else {
+        console.error("freedom.js: Error importing dependencies");
+      }
       return;
     }
+    // Create socket to the server
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
-    exports.freedom._onSocket(exports.io('/?csrf='+csrfToken));
-    //freedom._onSocket(exports.io());
+    var socket = exports.io("/?csrf=" + csrfToken);
+    // Get initialization information from the server
+    socket.on("init", function(resolve, reject, msg) {
+      console.log(msg);
+    }.bind({}, resolve, reject));
+    socket.emit("init", {
+      manifest: manifest,
+      options: options
+    });
   }
   
-  var freedom = new Freedom();
-  exports.freedom = freedom;
-  loadScript('/radiatus/public/bower_components/cookies-js/dist/cookies.min.js');
-  loadScript('/socket.io/socket.io.js');
-  init(exports);
+  // Dynamically load dependencies
+  loadScript("/radiatus/public/bower_components/cookies-js/dist/cookies.min.js");
+  loadScript("/socket.io/socket.io.js");
+  if (typeof exports.Promise == "undefined") {
+    loadScript("/radiatus/public/bower_components/es6-promise-polyfill/promise.js");
+  }
+  // Match the freedom.js external interface
+  exports.freedom = function(manifest, options) {
+    return new Promise(function(manifest, options, resolve, reject) {
+      init(exports, manifest, options, resolve, reject, 100);
+    }.bind({}, manifest, options));
+  };
 })(window);

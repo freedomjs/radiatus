@@ -6,6 +6,7 @@
   "private": true,
   "dependencies": {
     "foundation": "~5.3.0",
-    "cookies-js": "~0.4.0"
+    "cookies-js": "~0.4.0",
+    "es6-promise-polyfill": "~1.0.0"
   }
 }

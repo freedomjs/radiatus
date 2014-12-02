@@ -47,10 +47,8 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
 
 SocketHandler.prototype.onConnection = function(socket) {
   logger.trace('onConnection: enter');
-  /**
   console.log(socket.conn.request.session);
   console.log(socket.handshake.headers.cookie);
-  **/
 
   if (!socket.conn || !socket.conn.request ||
       !socket.conn.request.session ||
@@ -61,6 +59,9 @@ SocketHandler.prototype.onConnection = function(socket) {
   } 
 
   var id = socket.conn.request.session.passport.user;
+  socket.on('init', function(msg) {
+    console.log(msg);
+  });
   /**
   User.findById(id, function(socket, err, user) {
     if (err) {
