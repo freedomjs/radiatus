@@ -1,4 +1,7 @@
+/*jshint browser:true */
+/*global Promise */
 (function(exports) {
+  "use strict";
   var DEBUG = true;
   //Load JavaScript libraries
   function loadScript(url) {
@@ -17,7 +20,7 @@
   }
 
   Freedom.prototype.on = function(label, callback) {
-    if (DEBUG) console.log('register:on:' + label);
+    if (DEBUG) { console.log('register:on:' + label); }
     if (!this._onCallbacks.hasOwnProperty(label)) {
       this._onCallbacks[label] = [];
     }
@@ -30,7 +33,7 @@
   };
 
   Freedom.prototype.once = function(label, callback) {
-    if (DEBUG) console.log('once:' + label);
+    if (DEBUG) { console.log('once:' + label); }
     if (!this._onceCallbacks.hasOwnProperty(label)) {
       this._onceCallbacks[label] = [];
     }
@@ -44,8 +47,8 @@
     }
 
     if (DEBUG) {
-      if(typeof data == 'undefined') {console.log('emit:'+label);}
-      else {console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 200));}
+      if (typeof data === 'undefined') { console.log('emit:'+label); }
+      else { console.log('emit:'+label+':'+JSON.stringify(data).substr(0, 200)); }
     }
     this._socket.emit('message', {
       label: label,
@@ -78,8 +81,8 @@
     var i, callbacks;
     var label = msg.label;
     if (DEBUG) {
-      if (typeof msg.data == 'undefined') {console.log('on:'+msg.label);}
-      else {console.log('on:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200));}
+      if (typeof msg.data === 'undefined') { console.log('on:'+msg.label); }
+      else { console.log('on:'+msg.label+':'+JSON.stringify(msg.data).substr(0, 200)); }
     }
     
     if (this._onCallbacks.hasOwnProperty(label)) {
@@ -111,9 +114,9 @@
    **/
   function init(exports, manifest, options, resolve, reject, retries) {
     // Need to wait until dependencies have fully loaded
-    if (typeof exports.io == "undefined" || 
-        typeof exports.Cookies == "undefined" ||
-        typeof exports.Promise == "undefined") {
+    if (typeof exports.io === "undefined" || 
+        typeof exports.Cookies === "undefined" ||
+        typeof exports.Promise === "undefined") {
       if (retries > 0) {
         setTimeout(init.bind({}, exports, manifest, options, resolve, reject, (retries-1)), 10);
       } else {
@@ -121,7 +124,7 @@
       }
       return;
     }
-    if (DEBUG) console.log('freedom.js: Initializing connection to server');
+    if (DEBUG) { console.log('freedom.js: Initializing connection to server'); }
     // Create socket to the server
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
     var socket = exports.io("/?csrf=" + csrfToken);
@@ -138,7 +141,7 @@
   // Dynamically load dependencies
   loadScript("/radiatus/public/bower_components/cookies-js/dist/cookies.min.js");
   loadScript("/socket.io/socket.io.js");
-  if (typeof exports.Promise == "undefined") {
+  if (typeof exports.Promise === "undefined") {
     loadScript("/radiatus/public/bower_components/es6-promise-polyfill/promise.js");
   }
   // Match the freedom.js external interface

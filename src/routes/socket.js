@@ -4,6 +4,7 @@ var User = require("../models/user");
 var processManager = require("../core/processmanager").singleton;
 
 var SocketHandler = function(sessionStore, cookieParser, cookieKey) {
+  "use strict";
   logger.trace("constructor: enter");
   this._sessionStore = sessionStore;
   this._cookieParser = cookieParser;
@@ -11,6 +12,7 @@ var SocketHandler = function(sessionStore, cookieParser, cookieKey) {
 };
 
 SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
+  "use strict";
   logger.trace("onAuthorization: enter");
 
   if (!(handshakeData && handshakeData._query && handshakeData._query.csrf)) {
@@ -49,6 +51,7 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
 };
 
 SocketHandler.prototype.onConnection = function(socket) {
+  "use strict";
   logger.trace("onConnection: enter");
   console.log(socket.conn.request.session);
   console.log(socket.handshake.headers.cookie);
@@ -79,6 +82,7 @@ SocketHandler.prototype.onConnection = function(socket) {
  **/
 var socketHandler;
 module.exports.initialize = function(sessionStore, cookieParser, cookieKey) {
+  "use strict";
   if (typeof socketHandler !== "undefined") {
     return socketHandler;
   }

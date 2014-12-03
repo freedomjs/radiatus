@@ -9,6 +9,7 @@ var loggers = {};   // Store name->logger
 winston.addColors(config.get('log.colors'));
 
 function getLogger(name) {
+  "use strict";
   if (loggers.hasOwnProperty(name)) {
     return loggers[name];
   }

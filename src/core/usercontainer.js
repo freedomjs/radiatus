@@ -1,33 +1,31 @@
 var path = require("path");
 var Q = require("q");
 var fs = require("fs");
+var freedom = require("freedom-for-node");
 var util = require("./util");
 var Provider = require("freedom/src/provider");
 var Consumer = require("freedom/src/consumer");
 
 var UserContainer = function(name, manifest) {
+  "use strict";
   this.logger = require("../core/logger").getLogger(path.basename(__filename) + ":" + name);
   this.logger.trace("constructor: enter");
 
   this._name = name;
   this._manifest = manifest;
   this._sockets = [];
-  if (typeof defaultBehavior !== "undefined" &&
-      BehaviorEnum.hasOwnProperty(defaultBehavior)) {
-    this._behavior = defaultBehavior;
-  } else {
-    this._behavior = "ALWAYS";
-  }
   this._manifestJson = null;
   this._moduleConstructor = null;
   this._initialize();
 };
 
 UserContainer.prototype.getStatus = function() {
+  "use strict";
   return this._status;
 };
 
 UserContainer.prototype.addSocket = function(socket) {
+  "use strict";
   this.logger.trace("addSocket: enter");
   this._sockets.push(socket);
   socket.on("init", function(msg) {
@@ -67,10 +65,11 @@ UserContainer.prototype.addSocket = function(socket) {
 };
 
 UserContainer.prototype._initialize = function() {
+  "use strict";
   this.logger.trace("_initialize: enter");
   if (this._manifestJson === null) {
     fs.readFile(this._manifest, function(err, file) {
-      if (err) throw err;
+      if (err) { throw err; }
       this._manifestJson = JSON.parse(file);
     }.bind(this));
   }
@@ -89,19 +88,23 @@ UserContainer.prototype._initialize = function() {
 
 
 function Handler(username) {
+  "use strict";
   this._username = username;
   this._label = null;
   this._socket = null;
 }
 Handler.prototype.setSocket = function(socket) {
+  "use strict";
   this._socket = socket;
 };
 Handler.prototype.checkLabel = function(label) {
+  "use strict";
   this._label = label; 
   return true;
 }; 
 Handler.prototype.processData = function(userLogger, data) {
-  if (typeof data == "undefined") {userLogger.debug(this._username+":on:"+this._label);}
+  "use strict";
+  if (typeof data === "undefined") { userLogger.debug(this._username+":on:"+this._label); }
   else {userLogger.debug(this._username+":on:"+this._label+":"+JSON.stringify(data).substr(0, 100));}
 
   if (this._socket !== null) {

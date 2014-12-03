@@ -1,4 +1,4 @@
-/*globals freedom:true, fdom, WebSocket, console, require*/
+/*globals freedom:true, fdom, WebSocket, console, require, Blob*/
 /*jslint sloppy:true*/
 var config = require('config');
 var urlParser = require('url');
@@ -76,10 +76,11 @@ WS.prototype.rewriteUrl = function(url) {
     return url;
   }
   var servers = config.get('providerServers');
+  var parsedUrl, parsedQuery;
   
   for (var i=0; i<servers.length; i++) {
     var toCheck = servers[i];
-    if (url.substr(0, toCheck.url.length) == toCheck.url) {
+    if (url.substr(0, toCheck.url.length) === toCheck.url) {
       parsedUrl = urlParser.parse(url);
       parsedQuery = queryParser.parse(parsedUrl.query);
       parsedQuery.radiatusSecret = toCheck.secret;

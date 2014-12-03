@@ -10,13 +10,14 @@ var express = require("express");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 
 var FileServer = function(dbg) {
+  "use strict";
   logger.trace('constructor: enter');
 
   this.files = {};
   this.manifests = {};
   this.index = null;
   this.debug = null;
-  if (typeof dbg == 'undefined') {
+  if (typeof dbg === 'undefined') {
     this.debug = false;
   } else {
     this.debug = dbg;
@@ -24,9 +25,10 @@ var FileServer = function(dbg) {
 };
 
 FileServer.prototype.serveModule = function(prefix, url) {
+  "use strict";
   function removeRelativePrefix(str) {
-    while(str[0] == '.' || 
-          str[0] == '/') {
+    while(str[0] === '.' || 
+          str[0] === '/') {
       str = str.substr(1);
     }
     return str;
@@ -42,9 +44,9 @@ FileServer.prototype.serveModule = function(prefix, url) {
 
     // map Scripts, Statics, Views
     var files = [];
-    if (manifest.app && manifest.app.static) files = files.concat(manifest.app.static);
-    if (manifest.app && manifest.app.script) files = files.concat(manifest.app.script);
-    if (manifest.app && manifest.app.index) files = files.concat(manifest.app.index);
+    if (manifest.app && manifest.app.static) { files = files.concat(manifest.app.static); }
+    if (manifest.app && manifest.app.script) { files = files.concat(manifest.app.script); }
+    if (manifest.app && manifest.app.index) { files = files.concat(manifest.app.index); }
     if (manifest.views) {
       manifest.views.keys().forEach(function(view) {
         files = files.concat(manifest.views[view]);
@@ -63,11 +65,13 @@ FileServer.prototype.serveModule = function(prefix, url) {
     // map dependencies
     if (manifest.dependencies) {
       for (var dep in manifest.dependencies) {
-        var depURL = manifest.dependencies[dep].url;
-        var depPrefix = path.join(prefix, dep);
-        this.serveModule(depPrefix, path.resolve(path.dirname(url), depURL));
-        manifest.dependencies[dep].url =
-            path.join(depPrefix, path.basename(depURL));
+        if (manifest.dependencies.hasOwnProperty(dep)) {
+          var depURL = manifest.dependencies[dep].url;
+          var depPrefix = path.join(prefix, dep);
+          this.serveModule(depPrefix, path.resolve(path.dirname(url), depURL));
+          manifest.dependencies[dep].url =
+              path.join(depPrefix, path.basename(depURL));
+        }
       }
     }
     this.manifests[resolvedURL] = manifest;
@@ -77,8 +81,9 @@ FileServer.prototype.serveModule = function(prefix, url) {
 
 // Handle web requests against known files.
 FileServer.prototype.route = function(req, res, next) {
+  "use strict";
   // Remove leading '/'
-  if (req.url.length && req.url[0] == '/') {
+  if (req.url.length && req.url[0] === '/') {
     req.url = req.url.substr(1);
   }
   // Check if grabbing index
@@ -120,6 +125,7 @@ FileServer.prototype.route = function(req, res, next) {
 
 /** ERROR HANDLING **/
 FileServer.prototype.sendError = function(req, res) {
+  "use strict";
   logger.warn("Generating error");
   var err = new Error('Not Found');
   err.status = 404;
@@ -143,6 +149,7 @@ FileServer.prototype.sendError = function(req, res) {
 };
 
 function ensureAuthenticated(req, res, next) {
+  "use strict";
   if (req.isAuthenticated()) {
     //logger.trace('Authenticated as ' + req.user.username);
     //res.render('account', { user: req.user });
@@ -163,6 +170,7 @@ function ensureAuthenticated(req, res, next) {
 var router;
 var server;
 module.exports.initialize = function(manifest, debug) {
+  "use strict";
   if (typeof router !== "undefined") {
     return router;
   }

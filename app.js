@@ -31,10 +31,12 @@ var io = require('socket.io')(http);
 var logger = require('./src/core/logger').getLogger(path.basename(__filename));
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {
+  "use strict";
   logger.error('Mongoose error:');
   logger.error(err);
 }.bind(this, logger));
 mongoose.connection.once('open', function(logger) {
+  "use strict";
   logger.info('Mongoose connection online to userDB');
 }.bind(this, logger));
 
@@ -116,5 +118,6 @@ app.use('/', fileServer);
 
 /** START 'ER UP**/
 http.listen(opts.port, function() {
+  "use strict";
   logger.info("Radiatus is running on port " + opts.port);
 });

@@ -6,6 +6,7 @@ var UserContainer = require("./usercontainer").UserContainer;
 var logger = require("./logger").getLogger(path.basename(__filename));
 
 function ProcessManager(manifest) {
+  "use strict";
   logger.trace("constructor: enter");
   this._defaultManifest = manifest;
   this._userContainers = {};
@@ -15,6 +16,7 @@ function ProcessManager(manifest) {
 }
 
 ProcessManager.prototype.getOrCreateUser = function(username) {
+  "use strict";
   if (!this._userContainers.hasOwnProperty(username)) {
     logger.trace('getOrCreateUser: creating user container ' + username);
     this._userContainers[username] = new UserContainer(username, this._defaultManifest, "ALWAYS");
@@ -23,10 +25,12 @@ ProcessManager.prototype.getOrCreateUser = function(username) {
 };
 
 ProcessManager.prototype.getServiceUser = function(name) {
+  "use strict";
   return this._serviceUsers[name];
 };
 
 ProcessManager.prototype.addSocket = function(username, socket) {
+  "use strict";
   logger.trace('addSocket: username=' + username);
   var container = this.getOrCreateUser(username);
   container.addSocket(socket);
@@ -35,6 +39,7 @@ ProcessManager.prototype.addSocket = function(username, socket) {
 // Currently no ability to suspend and wake on message
 // All containers must be up at all times
 ProcessManager.prototype._init = function() {
+  "use strict";
   logger.trace("_init: enter");
   // Create all user containers
   User.find({}, function(err, docs) {
@@ -47,7 +52,7 @@ ProcessManager.prototype._init = function() {
 
   // Initialize service users
   fs.readFile(this._defaultManifest, function(err, file) {
-    if (err) throw err;
+    if (err) { throw err; }
     var manifest = JSON.parse(file);
     if (manifest.services) {
       for (var k in manifest.services) {
@@ -69,6 +74,7 @@ ProcessManager.prototype._init = function() {
 
 var processManager;
 module.exports.initialize = function(manifest) {
+  "use strict";
   if (typeof processManager !== "undefined") {
     return processManager;
   }

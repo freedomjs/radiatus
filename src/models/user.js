@@ -23,25 +23,27 @@ var userSchema = mongoose.Schema({
 
 // Bcrypt middleware - salt passwords before saving
 userSchema.pre('save', function(next) {
+  "use strict";
   logger.trace('userSchema.pre(save...: enter');
-	if(!this.isModified('password')) return next();
-	bcrypt.genSalt(config.get('saltWorkFactor'), function(err, salt) {
-		if(err) return next(err);
-		bcrypt.hash(this.password, salt, function(err, hash) {
-			if(err) return next(err);
-			this.password = hash;
-			next();
-		}.bind(this));
-	}.bind(this));
+  if(!this.isModified('password')) { return next(); }
+  bcrypt.genSalt(config.get('saltWorkFactor'), function(err, salt) {
+    if(err) { return next(err); }
+    bcrypt.hash(this.password, salt, function(err, hash) {
+      if(err) { return next(err); }
+      this.password = hash;
+      next();
+    }.bind(this));
+  }.bind(this));
 });
 
 // Bcrypt middleware - password verification
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
+  "use strict";
   logger.trace('userSchema.methods.comparePassword: enter');
-	bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-		if(err) return cb(err);
-		cb(null, isMatch);
-	});
+  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+    if(err) { return cb(err); }
+    cb(null, isMatch);
+  });
 };
 
 module.exports = mongoose.model('User', userSchema);
