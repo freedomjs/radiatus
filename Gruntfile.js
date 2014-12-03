@@ -23,7 +23,7 @@ module.exports = function(grunt) {
     jsdoc: {
       dist: {
         src: [ 'src/**/*.js' ],
-        options: { destination: 'generated/doc' },
+        options: { destination: 'build/doc' },
       }
     },
     jasmine_node: {
