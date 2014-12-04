@@ -3,6 +3,7 @@ var Q = require("q");
 var fs = require("fs");
 var freedom = require("freedom-for-node");
 var util = require("./util");
+var EventInterface = require("freedom/src/proxy/eventInterface");
 var Provider = require("freedom/src/provider");
 var Consumer = require("freedom/src/consumer");
 
@@ -32,17 +33,21 @@ UserContainer.prototype.addSocket = function(socket) {
   // Make sure that the module exists
   this._initialize().then(function(socket) {
     socket.on("init", function(msg) {
-      this.logger.trace('message: init,' + JSON.stringify(msg));
-      if (this._manifestJson.hasOwnProperty('default') && 
-          this._manifestJson.hasOwnProperty('provides') &&
-          this._manifestJson.hasOwnProperty('api') &&
+      this.logger.trace("message: init," + JSON.stringify(msg));
+      if (this._manifestJson.hasOwnProperty("default") && 
+          this._manifestJson.hasOwnProperty("provides") &&
+          this._manifestJson.hasOwnProperty("api") &&
           this._manifestJson.provides.indexOf(this._manifestJson.default) >= 0 &&
           this._manifestJson.api.hasOwnProperty(this._manifestJson.default)) {
         // Try an apiInterface
-        socket.emit('init', { type: 'api', api: this._manifestJson.api[this._manifestJson.default] });
+        socket.emit("init", { type: "api", api: this._manifestJson.api[this._manifestJson.default] });
       } else {
-        socket.emit('init', { type: 'event' });
+        socket.emit("init", { type: "event" });
       }
+    }.bind(this));
+
+    socket.on("default", function(msg) {
+      this.logger.debug("default:" + JSON.stringify(msg));
     }.bind(this));
 
   }.bind(this, socket));
@@ -92,7 +97,7 @@ UserContainer.prototype._initialize = function() {
   }
 
   if (this._module === null) {
-    this.logger.debug("_initialize: Initializing freedom.js root module");
+    this.logger.trace("_initialize: Initializing freedom.js root module");
     freedom.freedom(this._manifest, {
     }).then(function(deferred, module) {
       this.logger.debug("_initialize: freedom.js module created");
@@ -108,8 +113,9 @@ UserContainer.prototype._initialize = function() {
 };
 
 UserContainer.prototype._teardown = function() {
+  "use strict";
   this.logger.trace("_teardown: enter");
-  if (this._module == null) {
+  if (this._module === null) {
     this.logger.warn("_teardown: module already destroyed");
     return;
   }

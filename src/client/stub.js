@@ -1,12 +1,49 @@
+/*jshint browser:true*/
+
+var EventInterface = require("freedom/src/proxy/eventInterface");
+var ApiInterface = require("freedom/src/proxy/apiInterface");
+var Consumer = require("freedom/src/consumer");
+
 var DEBUG = true;
 
-function Stub() {
+var Stub = function(config, socket) {
   "use strict";
-  this._socket = null;
+  this._config = config;
+  this._socket = socket;
+
+  this._initialize();
+  
+  // Old
   this._onCallbacks = {};
   this._onceCallbacks = {};
   this._queue = [];
-}
+};
+
+Stub.prototype._initialize = function() {
+  "use strict";
+  if (this._config.type === "api") {
+    this._setupApiInterface();
+  } else if (this._config.type === "event") {
+    this._setupEventInterface();
+  } else {
+    console.error("Invalid configuration from server");
+  }
+};
+
+Stub.prototype._setupApiInterface = function() {
+  "use strict";
+  var interfaceCls = ApiInterface.bind({}, this._config.api);
+  var c = new Consumer(interfaceCls, console);
+  c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
+  c.on("default", function(msg) {
+    console.log('out: ' + JSON.stringify(msg));
+  });
+  window.temp = c;
+};
+
+Stub.prototype._setupEventInterface = function() {
+  "use strict";
+};
 
 Stub.prototype.on = function(label, callback) {
   "use strict";

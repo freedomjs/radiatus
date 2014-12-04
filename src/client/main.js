@@ -1,9 +1,10 @@
 /*jshint browser:true */
 /*global Promise*/
 
+var EventInterface = require("freedom/src/proxy/eventInterface");
+var ApiInterface = require("freedom/src/proxy/apiInterface");
 var Consumer = require("freedom/src/consumer");
 var util = require("./util");
-var Stub = require("./stub").Stub;
 var DEBUG = true;
 
 (function(exports) {
@@ -37,13 +38,34 @@ var DEBUG = true;
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
     var socket = exports.io("/?csrf=" + csrfToken);
     // Get initialization information from the server
-    socket.on("init", function(resolve, reject, msg) {
-      if (DEBUG) { console.log(msg); }
-    }.bind({}, resolve, reject));
+    socket.once("init", function(socket, resolve, reject, msg) {
+      if (DEBUG) { console.log("message: init," + JSON.stringify(msg)); }
+      var interfaceCls;
+      if (this._config.type === "api") {
+        interfaceCls = ApiInterface.bind({}, this._config.api);
+      } else if (this._config.type === "event") {
+        interfaceCls = EventInterface.bind({});
+      } else {
+        console.error("Invalid configuration from server");
+      }
+      var c = new Consumer(interfaceCls, console);
+      c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
+      c.on("default", function(socket, msg) {
+        console.log('out: ' + JSON.stringify(msg));
+        socket.emit("default", msg);
+      }.bind({}, socket));
+      socket.on("default", function(c, msg) {
+        console.log('in: ' + JSON.stringify(msg));
+        c.onMessage("default", msg);
+      }.bind({}, c));
+      resolve(c.getInterface.bind(c));
+    }.bind({}, socket, resolve, reject));
     socket.emit("init", {
       manifest: manifest,
       options: options
     });
+    // Debug
+    if (DEBUG) { exports.radiatusSocket = socket; }
   }
 
   // Dynamically load dependencies
