@@ -17,6 +17,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
     browserify: {
+      options: { browserifyOptions: { debug: true } },
       client: {
         files: { "build/freedom.js": [ "src/client/main.js" ] },
         options: {}

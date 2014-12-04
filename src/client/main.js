@@ -39,7 +39,7 @@ var DEBUG = true;
     var socket = exports.io("/?csrf=" + csrfToken);
     // Get initialization information from the server
     socket.once("init", function(socket, resolve, reject, msg) {
-      if (DEBUG) { console.log("message: init," + JSON.stringify(msg)); }
+      if (DEBUG) { console.log("socket: init," + JSON.stringify(msg)); }
       var interfaceCls;
       if (this._config.type === "api") {
         interfaceCls = ApiInterface.bind({}, this._config.api);
@@ -51,11 +51,11 @@ var DEBUG = true;
       var c = new Consumer(interfaceCls, console);
       c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
       c.on("default", function(socket, msg) {
-        console.log('out: ' + JSON.stringify(msg));
+        if (DEBUG) { console.log('consumer: default,' + JSON.stringify(msg)); }
         socket.emit("default", msg);
       }.bind({}, socket));
       socket.on("default", function(c, msg) {
-        console.log('in: ' + JSON.stringify(msg));
+        if (DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
         c.onMessage("default", msg);
       }.bind({}, c));
       resolve(c.getInterface.bind(c));
@@ -81,5 +81,5 @@ var DEBUG = true;
     }.bind({}, manifest, options));
   };
 
-  console.log("freedom.js stub loaded");
+  if (DEBUG ) { console.log("freedom.js stub loaded"); }
 })(window);

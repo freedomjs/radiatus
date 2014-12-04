@@ -33,7 +33,7 @@ UserContainer.prototype.addSocket = function(socket) {
   // Make sure that the module exists
   this._initialize().then(function(socket) {
     socket.on("init", function(msg) {
-      this.logger.trace("message: init," + JSON.stringify(msg));
+      this.logger.trace("socket: init," + JSON.stringify(msg));
       if (this._manifestJson.hasOwnProperty("default") && 
           this._manifestJson.hasOwnProperty("provides") &&
           this._manifestJson.hasOwnProperty("api") &&
@@ -47,7 +47,7 @@ UserContainer.prototype.addSocket = function(socket) {
     }.bind(this));
 
     socket.on("default", function(msg) {
-      this.logger.debug("default:" + JSON.stringify(msg));
+      this.logger.debug("socket: default," + JSON.stringify(msg));
     }.bind(this));
 
   }.bind(this, socket));
