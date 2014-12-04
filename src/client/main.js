@@ -38,15 +38,18 @@ var DEBUG = true;
     var csrfToken = exports.Cookies.get('XSRF-TOKEN');
     var socket = exports.io("/?csrf=" + csrfToken);
     // Get initialization information from the server
-    socket.once("init", function(socket, resolve, reject, msg) {
+    socket.once("init", function(exports, socket, resolve, reject, msg) {
       if (DEBUG) { console.log("socket: init," + JSON.stringify(msg)); }
       var interfaceCls;
-      if (this._config.type === "api") {
-        interfaceCls = ApiInterface.bind({}, this._config.api);
-      } else if (this._config.type === "event") {
+      if (msg.type === "api") {
+        interfaceCls = ApiInterface.bind({}, msg.api);
+        if (DEBUG) { console.log("freedom.js: creating an API interface"); }
+      } else if (msg.type === "event") {
         interfaceCls = EventInterface.bind({});
+        if (DEBUG) { console.log("freedom.js: creating an event interface"); }
       } else {
         console.error("Invalid configuration from server");
+        return;
       }
       var c = new Consumer(interfaceCls, console);
       c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
@@ -58,14 +61,16 @@ var DEBUG = true;
         if (DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
         c.onMessage("default", msg);
       }.bind({}, c));
-      resolve(c.getInterface.bind(c));
-    }.bind({}, socket, resolve, reject));
+      resolve(c.getProxyInterface());
+
+      // Debug
+      if (DEBUG) { exports.radiatusSocket = socket; }
+      if (DEBUG) { exports.radiatusConsumer = c; }
+    }.bind({}, exports, socket, resolve, reject));
     socket.emit("init", {
       manifest: manifest,
       options: options
     });
-    // Debug
-    if (DEBUG) { exports.radiatusSocket = socket; }
   }
 
   // Dynamically load dependencies
