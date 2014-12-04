@@ -53,8 +53,8 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
 SocketHandler.prototype.onConnection = function(socket) {
   "use strict";
   logger.trace("onConnection: enter");
-  console.log(socket.conn.request.session);
-  console.log(socket.handshake.headers.cookie);
+  //console.log(socket.conn.request.session);
+  //console.log(socket.handshake.headers.cookie);
 
   if (!socket.conn || !socket.conn.request ||
       !socket.conn.request.session ||

@@ -15,7 +15,7 @@ var UserContainer = function(name, manifest) {
   this._manifest = manifest;
   this._sockets = [];
   this._manifestJson = null;
-  this._moduleConstructor = null;
+  this._module = null; // this._module.close() / this._module.close(instance)
   this._initialize();
 };
 
@@ -28,10 +28,24 @@ UserContainer.prototype.addSocket = function(socket) {
   "use strict";
   this.logger.trace("addSocket: enter");
   this._sockets.push(socket);
-  socket.on("init", function(msg) {
-    
-    console.log(msg);
-  });
+  
+  // Make sure that the module exists
+  this._initialize().then(function(socket) {
+    socket.on("init", function(msg) {
+      this.logger.trace('message: init,' + JSON.stringify(msg));
+      if (this._manifestJson.hasOwnProperty('default') && 
+          this._manifestJson.hasOwnProperty('provides') &&
+          this._manifestJson.hasOwnProperty('api') &&
+          this._manifestJson.provides.indexOf(this._manifestJson.default) >= 0 &&
+          this._manifestJson.api.hasOwnProperty(this._manifestJson.default)) {
+        // Try an apiInterface
+        socket.emit('init', { type: 'api', api: this._manifestJson.api[this._manifestJson.default] });
+      } else {
+        socket.emit('init', { type: 'event' });
+      }
+    }.bind(this));
+
+  }.bind(this, socket));
 /**
  * 
   var handler = new Handler(username);
@@ -67,6 +81,9 @@ UserContainer.prototype.addSocket = function(socket) {
 UserContainer.prototype._initialize = function() {
   "use strict";
   this.logger.trace("_initialize: enter");
+  
+  var deferred = Q.defer();
+
   if (this._manifestJson === null) {
     fs.readFile(this._manifest, function(err, file) {
       if (err) { throw err; }
@@ -74,18 +91,32 @@ UserContainer.prototype._initialize = function() {
     }.bind(this));
   }
 
-  if (this._moduleConstructor === null) {
-    this.logger.debug("_startModule: Initializing freedom.js root module");
+  if (this._module === null) {
+    this.logger.debug("_initialize: Initializing freedom.js root module");
     freedom.freedom(this._manifest, {
-    }, function(constructor) {
-      this.logger.debug("_startModule: freedom.js module created");
-      this._moduleConstructor = constructor;
-    }.bind(this));
+    }).then(function(deferred, module) {
+      this.logger.debug("_initialize: freedom.js module created");
+      this._module = module;
+      deferred.resolve();
+    }.bind(this, deferred));
     //register("core.storage", require("./coreproviders/storage.js").bind({}, username));
     //register("core.websocket", require("./coreproviders/websocket.js").bind({}, username));
+  } else {
+    deferred.resolve();
   }
+  return deferred.promise;
 };
 
+UserContainer.prototype._teardown = function() {
+  this.logger.trace("_teardown: enter");
+  if (this._module == null) {
+    this.logger.warn("_teardown: module already destroyed");
+    return;
+  }
+
+  this._module.close();
+  this._module = null;
+};
 
 function Handler(username) {
   "use strict";

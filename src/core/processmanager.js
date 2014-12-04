@@ -19,7 +19,7 @@ ProcessManager.prototype.getOrCreateUser = function(username) {
   "use strict";
   if (!this._userContainers.hasOwnProperty(username)) {
     logger.trace('getOrCreateUser: creating user container ' + username);
-    this._userContainers[username] = new UserContainer(username, this._defaultManifest, "ALWAYS");
+    this._userContainers[username] = new UserContainer(username, this._defaultManifest);
   }
   return this._userContainers[username];
 };
@@ -60,7 +60,7 @@ ProcessManager.prototype._init = function() {
           var service = manifest.services[k];
           if (service.username && service.url) {
             var servicePath = path.resolve(path.dirname(this._defaultManifest), service.url);
-            this._serviceUsers[service.username] = new UserContainer(service.username, servicePath, "ALWAYS");
+            this._serviceUsers[service.username] = new UserContainer(service.username, servicePath);
             logger.trace('_init: creating service user=' + service.username);
           } else {
             logger.error("_init: failed to create service "+k+
