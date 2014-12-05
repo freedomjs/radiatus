@@ -43,11 +43,13 @@ UserContainer.prototype.addSocket = function(socket) {
           this._manifestJson.provides.indexOf(this._manifestJson.default) >= 0 &&
           this._manifestJson.api.hasOwnProperty(this._manifestJson.default)) {
         // Try an apiInterface
+        socket.emit("init", { type: "api", api: this._manifestJson.api[this._manifestJson.default] });
         p = new Provider(this._manifestJson.api[this._manifestJson.default], this.logger);
         p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
         p.getInterface().providePromises(this._module);
-        socket.emit("init", { type: "api", api: this._manifestJson.api[this._manifestJson.default] });
       } else {
+        // Force an eventInterface
+        socket.emit("init", { type: "event" });
         p = new Consumer(EventInterface.bind({}), this.logger);
         p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
         //p.getInterface() on both sides
@@ -62,7 +64,6 @@ UserContainer.prototype.addSocket = function(socket) {
           this.logger.debug("instance: " + tag + "," + data);
           proxy.emit(tag, data);
         }.bind(this, proxy));
-        socket.emit("init", { type: "event" });
       }
       p.on('default', function(socket, msg) {
         this.logger.debug("provider: default," + JSON.stringify(msg));
@@ -75,35 +76,6 @@ UserContainer.prototype.addSocket = function(socket) {
     }.bind(this, socket));
 
   }.bind(this, socket));
-/**
- * 
-  var handler = new Handler(username);
-  this._handlers[username] = handler;
-    
-  var userLogger = require("./logger")(username);
-  fContext.on(
-    handler.checkLabel.bind(handler),
-    handler.processData.bind(handler, userLogger)
-  );
-
-  var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
-  this._handlers[username].setSocket(socket);
-  logger.debug("onConnection: connected user="+username);
-  
-  var userLogger = require("./logger")(username);
-  socket.on("message", function(username, fContext, userLogger, msg) {
-    if (typeof msg.data == "undefined") {userLogger.debug(username+":emit:"+msg.label);}
-    else {userLogger.debug(username+":emit:"+msg.label+":"+JSON.stringify(msg.data).substr(0, 200));}
-    // Need to place any instances of node.js Buffers
-    var newData = util.replaceBuffers(msg.data);
-    fContext.emit(msg.label, newData);
-  }.bind(this, username, fContext, userLogger));
-
-  socket.on("disconnect", function(username) {
-    this._handlers[username].setSocket(null);
-    logger.debug(username+":disconnected");
-  }.bind(this, username));
-  **/
 
 };
 
@@ -148,6 +120,34 @@ UserContainer.prototype._teardown = function() {
   this._module = null;
 };
 
+/**
+  var handler = new Handler(username);
+  this._handlers[username] = handler;
+    
+  var userLogger = require("./logger")(username);
+  fContext.on(
+    handler.checkLabel.bind(handler),
+    handler.processData.bind(handler, userLogger)
+  );
+
+  var fContext = this.getOrCreateFreedom(this._rootManifestPath, username);
+  this._handlers[username].setSocket(socket);
+  logger.debug("onConnection: connected user="+username);
+  
+  var userLogger = require("./logger")(username);
+  socket.on("message", function(username, fContext, userLogger, msg) {
+    if (typeof msg.data == "undefined") {userLogger.debug(username+":emit:"+msg.label);}
+    else {userLogger.debug(username+":emit:"+msg.label+":"+JSON.stringify(msg.data).substr(0, 200));}
+    // Need to place any instances of node.js Buffers
+    var newData = util.replaceBuffers(msg.data);
+    fContext.emit(msg.label, newData);
+  }.bind(this, username, fContext, userLogger));
+
+  socket.on("disconnect", function(username) {
+    this._handlers[username].setSocket(null);
+    logger.debug(username+":disconnected");
+  }.bind(this, username));
+
 function Handler(username) {
   "use strict";
   this._username = username;
@@ -177,5 +177,6 @@ Handler.prototype.processData = function(userLogger, data) {
     userLogger.warn(this._username+":on:"+this._label+":message dropped, no socket");
   }
 };
+**/
 
 module.exports.UserContainer = UserContainer;

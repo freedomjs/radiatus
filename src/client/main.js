@@ -1,14 +1,29 @@
 /*jshint browser:true */
 /*global Promise*/
 
-var EventInterface = require("freedom/src/proxy/eventInterface");
-var ApiInterface = require("freedom/src/proxy/apiInterface");
-var Consumer = require("freedom/src/consumer");
-var util = require("./util");
-var DEBUG = true;
-
 (function(exports) {
   "use strict";
+  var EventInterface = require("freedom/src/proxy/eventInterface");
+  var ApiInterface = require("freedom/src/proxy/apiInterface");
+  var Consumer = require("freedom/src/consumer");
+  var util = require("./util");
+  var DEBUG = true;
+
+  /**
+   * Load JavaScript into the window by dynamically adding a <script> tag
+   * Currently places tag right before first script
+   *
+   * @param {String} url - URL of script to load
+   **/
+  function loadScript(url) {
+    "use strict";
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+    var topScript = document.getElementsByTagName('script')[0];
+    topScript.parentNode.insertBefore(script, topScript);
+  }
+
   /**
     * Initialization code for the client stub.
     * This will get retried every 10ms until the dependencies
@@ -74,10 +89,10 @@ var DEBUG = true;
   }
 
   // Dynamically load dependencies
-  util.loadScript("/radiatus/public/bower_components/cookies-js/dist/cookies.min.js");
-  util.loadScript("/socket.io/socket.io.js");
+  loadScript("/radiatus/public/bower_components/cookies-js/dist/cookies.min.js");
+  loadScript("/socket.io/socket.io.js");
   if (typeof exports.Promise === "undefined") {
-    util.loadScript("/radiatus/public/bower_components/es6-promise-polyfill/promise.js");
+    loadScript("/radiatus/public/bower_components/es6-promise-polyfill/promise.js");
   }
   // Match the freedom.js external interface
   exports.freedom = function(manifest, options) {
@@ -86,5 +101,5 @@ var DEBUG = true;
     }.bind({}, manifest, options));
   };
 
-  if (DEBUG ) { console.log("freedom.js stub loaded"); }
+  if (DEBUG) { console.log("freedom.js stub loaded"); }
 })(window);
