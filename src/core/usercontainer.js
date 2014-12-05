@@ -51,6 +51,17 @@ UserContainer.prototype.addSocket = function(socket) {
         p = new Consumer(EventInterface.bind({}), this.logger);
         p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
         //p.getInterface() on both sides
+        var Proxy = p.getProxyInterface();
+        var proxy = new Proxy();
+        var instance = this._module();
+        proxy.on(function(instance, tag, data) {
+          this.logger.debug("proxy: " + tag + "," + data);
+          instance.emit(tag, data);
+        }.bind(this, instance));
+        instance.on(function(proxy, tag, data) {
+          this.logger.debug("instance: " + tag + "," + data);
+          proxy.emit(tag, data);
+        }.bind(this, proxy));
         socket.emit("init", { type: "event" });
       }
       p.on('default', function(socket, msg) {
