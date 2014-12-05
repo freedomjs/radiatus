@@ -32,7 +32,10 @@ UserContainer.prototype.addSocket = function(socket) {
   
   // Make sure that the module exists
   this._initialize().then(function(socket) {
-    socket.on("init", function(msg) {
+    // Respond to first 'init' message with a description of the interface
+    // Create the respective Provider/Consumer
+    socket.once("init", function(socket, msg) {
+      var p;
       this.logger.trace("socket: init," + JSON.stringify(msg));
       if (this._manifestJson.hasOwnProperty("default") && 
           this._manifestJson.hasOwnProperty("provides") &&
@@ -40,15 +43,25 @@ UserContainer.prototype.addSocket = function(socket) {
           this._manifestJson.provides.indexOf(this._manifestJson.default) >= 0 &&
           this._manifestJson.api.hasOwnProperty(this._manifestJson.default)) {
         // Try an apiInterface
+        p = new Provider(this._manifestJson.api[this._manifestJson.default], this.logger);
+        p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
+        p.getInterface().providePromises(this._module);
         socket.emit("init", { type: "api", api: this._manifestJson.api[this._manifestJson.default] });
       } else {
+        p = new Consumer(EventInterface.bind({}), this.logger);
+        p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
+        //p.getInterface() on both sides
         socket.emit("init", { type: "event" });
       }
-    }.bind(this));
-
-    socket.on("default", function(msg) {
-      this.logger.debug("socket: default," + JSON.stringify(msg));
-    }.bind(this));
+      p.on('default', function(socket, msg) {
+        this.logger.debug("provider: default," + JSON.stringify(msg));
+        socket.emit('default', msg);
+      }.bind(this, socket));
+      socket.on('default', function(p, msg) {
+        this.logger.debug("socket: default," + JSON.stringify(msg));
+        p.onMessage('default', msg);
+      }.bind(this, p));
+    }.bind(this, socket));
 
   }.bind(this, socket));
 /**
