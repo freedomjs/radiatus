@@ -4,6 +4,13 @@ var EventInterface = require("freedom/src/proxy/eventInterface");
 var ApiInterface = require("freedom/src/proxy/apiInterface");
 var Consumer = require("freedom/src/consumer");
 
+// Object exported on global => URL to source
+var DEPENDENCIES = {
+  io: "/radiatus/public/bower_components/cookies-js/dist/cookies.min.js",
+  Cookies: "/socket.io/socket.io.js",
+  Promise: "/radiatus/public/bower_components/es6-promise-polyfill/promise.js"
+};
+
 /**
  * A collection of functions to be used in generating the client stub
  * @constructor
@@ -12,23 +19,9 @@ var Consumer = require("freedom/src/consumer");
  **/
 var Client = function(debug, exports) {
   "use strict";
-  this.DEBUG = debug;
-  this.exports = exports;
-};
-
-/**
-  * Load JavaScript into the window by dynamically adding a script tag.
-  * Currently places tag right before first script.
-  * @method
-  * @param {String} url - URL of script to load
-  **/
-Client.prototype.loadScript = function(url) {
-  "use strict";
-  var script = this.exports.document.createElement('script');
-  script.type = 'text/javascript';
-  script.src = url;
-  var topScript = this.exports.document.getElementsByTagName('script')[0];
-  topScript.parentNode.insertBefore(script, topScript);
+  this._DEBUG = debug;
+  this._exports = exports;
+  this._init();
 };
 
 /**
@@ -46,9 +39,9 @@ Client.prototype.init = function(manifest, options, resolve, reject, retries) {
   "use strict";
 
   // Need to wait until dependencies have fully loaded
-  if (typeof this.exports.io === "undefined" || 
-      typeof this.exports.Cookies === "undefined" ||
-      typeof this.exports.Promise === "undefined") {
+  if (typeof this._exports.io === "undefined" || 
+      typeof this._exports.Cookies === "undefined" ||
+      typeof this._exports.Promise === "undefined") {
     if (retries > 0) {
       setTimeout(this.init.bind(this, manifest, options, resolve, reject, (retries-1)), 10);
     } else {
@@ -58,23 +51,23 @@ Client.prototype.init = function(manifest, options, resolve, reject, retries) {
     return;
   }
 
-  if (this.DEBUG) { console.log('freedom.js: Initializing connection to server'); }
+  if (this._DEBUG) { console.log('freedom.js: Initializing connection to server'); }
 
   // Create socket to the server
-  var csrfToken = this.exports.Cookies.get('XSRF-TOKEN');
-  var socket = this.exports.io("/?csrf=" + csrfToken);
+  var csrfToken = this._exports.Cookies.get('XSRF-TOKEN');
+  var socket = this._exports.io("/?csrf=" + csrfToken);
 
   // Get initialization information from the server
   socket.once("init", function(socket, resolve, reject, msg) {
-    if (this.DEBUG) { console.log("socket: init," + JSON.stringify(msg)); }
+    if (this._DEBUG) { console.log("socket: init," + JSON.stringify(msg)); }
     var interfaceCls;
     // Choose what type of interface to create
     if (msg.type === "api") {
       interfaceCls = ApiInterface.bind({}, msg.api);
-      if (this.DEBUG) { console.log("freedom.js: creating an API interface"); }
+      if (this._DEBUG) { console.log("freedom.js: creating an API interface"); }
     } else if (msg.type === "event") {
       interfaceCls = EventInterface.bind({});
-      if (this.DEBUG) { console.log("freedom.js: creating an event interface"); }
+      if (this._DEBUG) { console.log("freedom.js: creating an event interface"); }
     } else {
       console.error("Invalid configuration from server");
       reject("Invalid configuration from the server");
@@ -85,18 +78,18 @@ Client.prototype.init = function(manifest, options, resolve, reject, retries) {
     var c = new Consumer(interfaceCls, console);
     c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
     c.on("default", function(socket, msg) {
-      if (this.DEBUG) { console.log('consumer: default,' + JSON.stringify(msg)); }
+      if (this._DEBUG) { console.log('consumer: default,' + JSON.stringify(msg)); }
       socket.emit("default", msg);
     }.bind({}, socket));
     socket.on("default", function(c, msg) {
-      if (this.DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
+      if (this._DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
       c.onMessage("default", msg);
     }.bind({}, c));
     resolve(c.getProxyInterface());
 
     // Debug
-    if (this.DEBUG) { this.exports.radiatusSocket = socket; }
-    if (this.DEBUG) { this.exports.radiatusConsumer = c; }
+    if (this._DEBUG) { this._exports.radiatusSocket = socket; }
+    if (this._DEBUG) { this._exports.radiatusConsumer = c; }
   }.bind(this, socket, resolve, reject));
 
   // Send these parameters to the server to signal readiness
@@ -106,4 +99,36 @@ Client.prototype.init = function(manifest, options, resolve, reject, retries) {
   });
 };
 
+/**
+ * Load all of our dependencies
+ * @private
+ **/
+Client.prototype._init = function() {
+  "use strict";
+  // Load every dependency
+  for (var dep in DEPENDENCIES) {
+    if (DEPENDENCIES.hasOwnProperty(dep)) {
+      if (!this._exports.hasOwnProperty(dep)) {
+        this._loadScript(DEPENDENCIES[dep]);
+      }
+    }
+  }
+};
+
+/**
+  * Load JavaScript into the window by dynamically adding a script tag.
+  * Currently places tag right before first script.
+  * @private
+  * @param {String} url - URL of script to load
+  **/
+Client.prototype._loadScript = function(url) {
+  "use strict";
+  var script = this._exports.document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = url;
+  var topScript = this._exports.document.getElementsByTagName('script')[0];
+  topScript.parentNode.insertBefore(script, topScript);
+};
+
 module.exports.Client = Client;
+module.exports.dependencies = DEPENDENCIES;
