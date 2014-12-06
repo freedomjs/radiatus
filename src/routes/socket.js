@@ -1,16 +1,31 @@
 var path = require("path");
+var config = require("config");
+var cookieParser = require('cookie-parser');
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 var User = require("../models/user");
 var processManager = require("../core/processmanager").singleton;
 
-var SocketHandler = function(sessionStore, cookieParser, cookieKey) {
+/**
+ * Singleton to handle incoming socket.io connections
+ * Checks for proper authentication and forwards sockets to the process manager
+ * @constructor
+ * @param {SessionStore} sessionStore - currently a MongoStore
+ **/
+var SocketHandler = function(sessionStore) {
   "use strict";
   logger.trace("constructor: enter");
   this._sessionStore = sessionStore;
-  this._cookieParser = cookieParser;
-  this._cookieKey = cookieKey;
+  this._cookieParser = cookieParser(config.get('sessionSecret'));
+  this._cookieKey = config.get('cookieKey');
 };
 
+/**
+ * Static method to check whether an incoming user is authorized
+ * to open a socket to this server
+ * @method
+ * @param {Object} handshakeData - JSON containing handshake data
+ * @param {Function} accept - function to call when done
+ **/
 SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
   "use strict";
   logger.trace("onAuthorization: enter");
@@ -50,6 +65,13 @@ SocketHandler.prototype.onAuthorization = function(handshakeData, accept) {
   }.bind(this, handshakeData, accept));
 };
 
+/**
+ * Handle an incoming socket. At this point, we already know
+ * that the user is authorized, so determine the username
+ * and forward to the process manager
+ * @method
+ * @param {socket} socket - incoming socket.io connection
+ **/
 SocketHandler.prototype.onConnection = function(socket) {
   "use strict";
   logger.trace("onConnection: enter");
@@ -77,17 +99,15 @@ SocketHandler.prototype.onConnection = function(socket) {
   }.bind(this, socket));
 };
 
-/**
- * Keep a singleton
- **/
+// Keep a singleton
 var socketHandler;
-module.exports.initialize = function(sessionStore, cookieParser, cookieKey) {
+module.exports.initialize = function(sessionStore) {
   "use strict";
   if (typeof socketHandler !== "undefined") {
     return socketHandler;
   }
 
-  socketHandler = new SocketHandler(sessionStore, cookieParser, cookieKey);
+  socketHandler = new SocketHandler(sessionStore);
   module.exports.singleton = socketHandler;
   return socketHandler;
 };

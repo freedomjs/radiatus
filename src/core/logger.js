@@ -1,17 +1,27 @@
-/**
- * Wraps some boilerplate winston setup
- **/
-
 var winston = require('winston');
 var config = require('config');
 
-var loggers = {};   // Store name->logger
-winston.addColors(config.get('log.colors'));
-
-function getLogger(name) {
+/**
+ * Manages a set of named loggers from winston
+ * @constructor
+ **/
+var Logger = function() {
   "use strict";
-  if (loggers.hasOwnProperty(name)) {
-    return loggers[name];
+  this.loggers = {}; // Store name->logger
+  winston.addColors(config.get('log.colors'));
+};
+
+/**
+ * Retrieve a static named logger
+ * Make sure we only return 1 logger for each name
+ * @method
+ * @param {String} name - name of logger
+ * @return {Console} logger
+ **/
+Logger.prototype.getLogger = function(name) {
+  "use strict";
+  if (this.loggers.hasOwnProperty(name)) {
+    return this.loggers[name];
   }
   //Create new logger
   var opts = {
@@ -25,8 +35,11 @@ function getLogger(name) {
   winston.loggers.add(name, opts);
   var logger = winston.loggers.get(name);
   logger.setLevels(config.get('log.levels'));
-  loggers[name] = logger;
+  this.loggers[name] = logger;
   return logger;
-}
+};
 
-module.exports.getLogger = getLogger;
+// Keep a singleton
+var instance = new Logger();
+module.exports.getLogger = instance.getLogger.bind(instance);
+module.exports.singleton = instance;

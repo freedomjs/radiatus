@@ -48,6 +48,7 @@ describe(path.basename(__filename), function() {
       Cookies: { get: function(key) { return "csrf"; } },
       Promise: jasmine.createSpy("Promise")
     };
+    //spyOn(exports, "io").and.callThrough();
     var c = new Client(false, exports);
     var resolve = function(iface) {
       console.log('resolve');

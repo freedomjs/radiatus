@@ -4,6 +4,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var User = require('../models/user');
 
+/** PASSPORT.JS STRATEGIES **/
+// Setup the passport.js strategy for local logins
 passport.use('local-login', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
@@ -24,6 +26,7 @@ passport.use('local-login', new LocalStrategy({
   });
 }));
 
+// Setup the passport.js strategy for local signups
 passport.use('local-signup', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
@@ -47,11 +50,11 @@ passport.use('local-signup', new LocalStrategy({
   }); //process.nextTick
 })); //passport.Use
 
+// Identify the user by their id from Mongo
 passport.serializeUser(function(user, done) {
   "use strict";
   done(null, user.id);
 });
-
 passport.deserializeUser(function(id, done) {
   "use strict";
   User.findById(id, function(err, user) {
@@ -59,6 +62,14 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
+// Helper function to ensure a user is logged in
+function ensureAuthenticated(req, res, next) {
+  "use strict";
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/radiatus/auth/login');
+}
+
+/** ROUTES **/
 router.post('/login', passport.authenticate('local-login', { 
   successRedirect: '/',
   failureRedirect: '/radiatus/auth/login',
@@ -70,12 +81,6 @@ router.post('/signup', passport.authenticate('local-signup', {
   failureRedirect: '/radiatus/auth/login',
   failureFlash: true
 }));
-
-function ensureAuthenticated(req, res, next) {
-  "use strict";
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/radiatus/auth/login');
-}
 
 router.get('/account', ensureAuthenticated, function(req, res){
   "use strict";

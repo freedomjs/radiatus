@@ -1,14 +1,15 @@
-/** 
- * FileServer class
- * - Takes in a root module's manifest file and
- *   serves all relevant files in the dependency tree
- **/
 var fs = require("fs");
 var path = require("path");
 var mime = require("mime");
 var express = require("express");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 
+/** 
+ * Serves files defined in a freedom.js manifest file and in all of its
+ * dependencies
+ * @constructor
+ * @param {Boolean} dbg - turn on debugging
+ **/
 var FileServer = function(dbg) {
   "use strict";
   logger.trace('constructor: enter');
@@ -24,6 +25,9 @@ var FileServer = function(dbg) {
   }
 };
 
+/**
+ *
+ **/
 FileServer.prototype.serveModule = function(prefix, url) {
   "use strict";
   function removeRelativePrefix(str) {
@@ -148,6 +152,8 @@ FileServer.prototype.sendError = function(req, res) {
   }
 };
 
+/**
+ **/
 function ensureAuthenticated(req, res, next) {
   "use strict";
   if (req.isAuthenticated()) {

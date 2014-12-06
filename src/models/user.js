@@ -1,13 +1,12 @@
-/**
- * Mongoose model for a user account on the web server
- **/
-
 var mongoose = require("mongoose");
 var bcrypt = require("bcrypt");
 var config = require("config");
 var path = require("path");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 
+/**
+ * Mongoose model for a user account on the web server
+ **/
 var userSchema = mongoose.Schema({
   // Unique username
   username: { type: String, required: true, unique: true },

@@ -7,6 +7,12 @@ var EventInterface = require("freedom/src/proxy/eventInterface");
 var Provider = require("freedom/src/provider");
 var Consumer = require("freedom/src/consumer");
 
+/**
+ * Class that manages the user container for a single user or service user
+ * @constructor
+ * @param {String} name - username or name of service user
+ * @param {String} manifest - URI to manifest of freedom.js module to run
+ **/
 var UserContainer = function(name, manifest) {
   "use strict";
   this.logger = require("../core/logger").getLogger(path.basename(__filename) + ":" + name);
@@ -20,11 +26,11 @@ var UserContainer = function(name, manifest) {
   this._initialize();
 };
 
-UserContainer.prototype.getStatus = function() {
-  "use strict";
-  return this._status;
-};
-
+/**
+ * Handle an incoming socket from socket.io
+ * @method
+ * @param {socket} socket - new socket.io connection
+ **/
 UserContainer.prototype.addSocket = function(socket) {
   "use strict";
   this.logger.trace("addSocket: enter");
@@ -79,6 +85,13 @@ UserContainer.prototype.addSocket = function(socket) {
 
 };
 
+/**
+ * Initialize the user container.
+ * Read and parse the JSON from the manifest and 
+ * start the freedom.js module
+ * @private
+ * @return {Promise} - fulfills when freedom.js module is loaded
+ **/
 UserContainer.prototype._initialize = function() {
   "use strict";
   this.logger.trace("_initialize: enter");
@@ -108,6 +121,10 @@ UserContainer.prototype._initialize = function() {
   return deferred.promise;
 };
 
+/**
+ * Destroys the freedom.js module
+ * @private
+ **/
 UserContainer.prototype._teardown = function() {
   "use strict";
   this.logger.trace("_teardown: enter");

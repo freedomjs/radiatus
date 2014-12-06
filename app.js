@@ -66,11 +66,7 @@ var processManager = require('./src/core/processmanager').initialize(
 );
 var authRouter = require('./src/routes/auth').router;
 var fileServer = require('./src/routes/fileserver').initialize(opts.path, opts.debug);
-var socketHandler = new require("./src/routes/socket").initialize(
-  sessionStore, 
-  cookieParser(config.get('sessionSecret')),
-  config.get('cookieKey')
-);
+var socketHandler = new require("./src/routes/socket").initialize(sessionStore);
 
 /** VIEW ENGINE **/
 app.set('views', path.join(__dirname, './views'));

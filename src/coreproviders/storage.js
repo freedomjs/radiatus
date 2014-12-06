@@ -15,9 +15,7 @@ var keyValueSchema = mongoose.Schema({
 });
 
 var KeyValue = mongoose.model('Storage', keyValueSchema);
-/**
- * @constructor
- */
+
 var Storage_node = function(username, channel, dispatch) {
   this.username = username;
   this.dispatchEvents = dispatch;
