@@ -43,7 +43,7 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
     if (retries > 0) {
       setTimeout(this.connect.bind(this, manifest, options, resolve, reject, (retries-1)), 10);
     } else {
-      console.error("freedom.js: Error importing dependencies");
+      if (this._DEBUG) { console.error("freedom.js: Error importing dependencies"); }
       reject("Failed to import dependencies");
     }
     return;
@@ -67,7 +67,7 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
       interfaceCls = EventInterface.bind({});
       if (this._DEBUG) { console.log("freedom.js: creating an event interface"); }
     } else {
-      console.error("Invalid configuration from server");
+      if (this._DEBUG) { console.error("Invalid configuration from server"); }
       reject("Invalid configuration from the server");
       return;
     }
