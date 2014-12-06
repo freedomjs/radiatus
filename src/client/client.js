@@ -33,17 +33,15 @@ var Client = function(debug, exports) {
   * @param {Object} options - freedom.js options
   * @param {Function} resolve - function to call to resolve the freedom Promise
   * @param {Function} reject - function to call to reject the freedom Promise
-  * @param {Number} retries - number of retries left for init
+  * @param {Number} retries - number of retries left
   **/
-Client.prototype.init = function(manifest, options, resolve, reject, retries) {
+Client.prototype.connect = function(manifest, options, resolve, reject, retries) {
   "use strict";
 
   // Need to wait until dependencies have fully loaded
-  if (typeof this._exports.io === "undefined" || 
-      typeof this._exports.Cookies === "undefined" ||
-      typeof this._exports.Promise === "undefined") {
+  if (!this._haveDependencies()) {
     if (retries > 0) {
-      setTimeout(this.init.bind(this, manifest, options, resolve, reject, (retries-1)), 10);
+      setTimeout(this.connect.bind(this, manifest, options, resolve, reject, (retries-1)), 10);
     } else {
       console.error("freedom.js: Error importing dependencies");
       reject("Failed to import dependencies");
@@ -80,11 +78,11 @@ Client.prototype.init = function(manifest, options, resolve, reject, retries) {
     c.on("default", function(socket, msg) {
       if (this._DEBUG) { console.log('consumer: default,' + JSON.stringify(msg)); }
       socket.emit("default", msg);
-    }.bind({}, socket));
+    }.bind(this, socket));
     socket.on("default", function(c, msg) {
       if (this._DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
       c.onMessage("default", msg);
-    }.bind({}, c));
+    }.bind(this, c));
     resolve(c.getProxyInterface());
 
     // Debug
@@ -113,6 +111,23 @@ Client.prototype._init = function() {
       }
     }
   }
+};
+
+/**
+ * Checks to see if all dependencies are loaded on global
+ * @private
+ * @return {Boolean} whether all dependencies have loaded
+ **/
+Client.prototype._haveDependencies = function() {
+  "use strict";
+  for (var dep in DEPENDENCIES) {
+    if (DEPENDENCIES.hasOwnProperty(dep)) {
+      if (!this._exports.hasOwnProperty(dep)) {
+        return false;
+      }
+    }
+  }
+  return true;
 };
 
 /**
