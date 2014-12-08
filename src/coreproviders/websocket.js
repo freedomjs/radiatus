@@ -8,7 +8,7 @@ var queryParser = require('querystring');
  * A WebSocket core provider for Radiatus
  * Key feature is that if it detects the radiatus-providers server,
  * it will add a query string to the URL with special credentials
- *
+ * @constructor
  * @param {username} Username of the active user
  * @param {port.Module} module The Module requesting this provider
  * @param {Function} dispatchEvent Function to dispatch events.

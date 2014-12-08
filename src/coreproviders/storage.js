@@ -1,10 +1,8 @@
 /*globals require,fdom:true*/
 /*jslint indent:2,white:true,sloppy:true,node:true,nomen:true */
 
-/**
- * core.storage provider for Radiatus runtime
- * Backed by Mongoose/MongoDB
- */
+// core.storage provider for Radiatus runtime
+// Backed by Mongoose/MongoDB
 
 var mongoose = require('mongoose');
 

@@ -26,7 +26,10 @@ var FileServer = function(dbg) {
 };
 
 /**
- *
+ * Read through a manifest and setup the file server
+ * @method
+ * @param {String} prefix - string prefix of where file is served from
+ * @param {String} url - path to the manifest file
  **/
 FileServer.prototype.serveModule = function(prefix, url) {
   "use strict";
@@ -83,7 +86,14 @@ FileServer.prototype.serveModule = function(prefix, url) {
   }.bind(this));
 };
 
-// Handle web requests against known files.
+/**
+ * The express.js route. Read the request and serve
+ * the appropriate file
+ * @method
+ * @param {request} req - express.js request
+ * @param {response} res - express.js response
+ * @param {Function} next - function to call to advance to next route
+ **/
 FileServer.prototype.route = function(req, res, next) {
   "use strict";
   // Remove leading '/'
@@ -127,7 +137,12 @@ FileServer.prototype.route = function(req, res, next) {
   }
 };
 
-/** ERROR HANDLING **/
+/** 
+* Error handling route
+* @method
+ * @param {request} req - express.js request
+ * @param {response} res - express.js response
+**/
 FileServer.prototype.sendError = function(req, res) {
   "use strict";
   logger.warn("Generating error");
@@ -153,8 +168,14 @@ FileServer.prototype.sendError = function(req, res) {
 };
 
 /**
+ * Helper function to check if the request is authenticated
+ * by passport.js
+ * @method
+ * @param {request} req - express.js request
+ * @param {response} res - express.js response
+ * @param {Function} next - function to call to advance to next route
  **/
-function ensureAuthenticated(req, res, next) {
+FileServer.prototype.ensureAuthenticated = function(req, res, next) {
   "use strict";
   if (req.isAuthenticated()) {
     //logger.trace('Authenticated as ' + req.user.username);
@@ -168,11 +189,9 @@ function ensureAuthenticated(req, res, next) {
       csrf: req.csrfToken()
     });
   }
-}
+};
 
-/**
- * This module is a Singleton
- **/
+// This module is a singleton
 var router;
 var server;
 module.exports.initialize = function(manifest, debug) {
@@ -184,7 +203,7 @@ module.exports.initialize = function(manifest, debug) {
   router = express.Router();
   server = new FileServer(debug);
   server.serveModule('./', manifest);
-  router.get('*', ensureAuthenticated, server.route.bind(server));
+  router.get('*', server.ensureAuthenticated.bind(server), server.route.bind(server));
   module.exports.router = router;
   return router;
 };
