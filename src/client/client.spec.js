@@ -39,7 +39,7 @@ describe(path.basename(__filename), function() {
 
   it("connect tries to open socket", function(done) {
     var socket = {
-      once: function() {},
+      once: function(tag, cb) { cb({type: 'event'}); },
       on: function() {},
       emit: jasmine.createSpy("socket.emit")
     };
@@ -48,18 +48,16 @@ describe(path.basename(__filename), function() {
       Cookies: { get: function(key) { return "csrf"; } },
       Promise: jasmine.createSpy("Promise")
     };
-    //spyOn(exports, "io").and.callThrough();
     var c = new Client(false, exports);
     var resolve = function(iface) {
+      expect(iface).toBeDefined();
+      done();
       console.log('resolve');
     };
     var reject = function(reason) { console.log('reject'); };
     c.connect("manifest", {}, resolve, reject, 1);
-    //expect(exports.io.calls.argsFor(0)).toEqual(["/?csrf=csrf"]);
     expect(socket.emit).toHaveBeenCalledWith("init", jasmine.objectContaining({
       manifest: jasmine.any(String)
     }));
-    done();
   });
-
 });
