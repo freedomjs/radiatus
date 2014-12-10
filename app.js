@@ -2,6 +2,7 @@
  * Radiatus Entry
  **/
 
+/** IMPORTS **/
 var path = require('path');
 var express = require('express');
 var ejsLocals = require('ejs-locals');
@@ -15,7 +16,7 @@ var csrf = require('csurf');
 var flash = require('connect-flash');
 var mongoose = require('mongoose');
 
-/** APPLICATION **/
+/** EXPRESS APPLICATION **/
 var config = require('config');
 var app = express();
 // For alternatives, see
@@ -27,13 +28,15 @@ var sessionStore = new MongoStore({
 }); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var logger = require('./src/logger')('app.js');
+var logger = require('./src/core/logger').getLogger(path.basename(__filename));
 mongoose.connect(config.get('userDB'));
 mongoose.connection.on('error', function(logger, err) {
+  "use strict";
   logger.error('Mongoose error:');
   logger.error(err);
 }.bind(this, logger));
 mongoose.connection.once('open', function(logger) {
+  "use strict";
   logger.info('Mongoose connection online to userDB');
 }.bind(this, logger));
 
@@ -58,16 +61,12 @@ var opts = require('nomnom')
   .parse();
 
 /** SUBMODULES **/
-//var userRouter = require('./userrouter');
-var authRouter = require('./src/routes/auth');
-var fileServer = require('./src/routes/fileserver').serve(opts.path, opts.debug);
-var ProcessManager = require('./src/processmanager').ProcessManager;
-var processManager = new ProcessManager(
-  path.join(__dirname, opts.path),
-  sessionStore, 
-  cookieParser(config.get('sessionSecret')),
-  config.get('cookieKey')
+var processManager = require('./src/core/processmanager').initialize(
+  path.join(__dirname, opts.path)
 );
+var authRouter = require('./src/routes/auth').router;
+var fileServer = require('./src/routes/fileserver').initialize(opts.path, opts.debug);
+var socketHandler = new require("./src/routes/socket").initialize(sessionStore);
 
 /** VIEW ENGINE **/
 app.set('views', path.join(__dirname, './views'));
@@ -100,24 +99,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(csrf());
 app.use(flash());
-io.set('authorization', processManager.onAuthorization.bind(processManager));
+io.set('authorization', socketHandler.onAuthorization.bind(socketHandler));
 
 /** ROUTES **/
 // socket.io endpoint
-// @TODO - user management
-io.on('connection', processManager.onConnection.bind(
-  processManager
-));
-
+io.on('connection', socketHandler.onConnection.bind(socketHandler));
 // User authentication
 app.use('/radiatus/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
-app.use('*/freedom.js', express.static(path.join(__dirname, 'src/client/freedom.js')));
+app.use('*/freedom.js', express.static(path.join(__dirname, 'build/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.all('/freedom/*', userRouter.route);
 
 /** START 'ER UP**/
 http.listen(opts.port, function() {
+  "use strict";
   logger.info("Radiatus is running on port " + opts.port);
 });

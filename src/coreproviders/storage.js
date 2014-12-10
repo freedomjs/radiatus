@@ -1,10 +1,8 @@
 /*globals require,fdom:true*/
 /*jslint indent:2,white:true,sloppy:true,node:true,nomen:true */
 
-/**
- * core.storage provider for Radiatus runtime
- * Backed by Mongoose/MongoDB
- */
+// core.storage provider for Radiatus runtime
+// Backed by Mongoose/MongoDB
 
 var mongoose = require('mongoose');
 
@@ -15,9 +13,7 @@ var keyValueSchema = mongoose.Schema({
 });
 
 var KeyValue = mongoose.model('Storage', keyValueSchema);
-/**
- * @constructor
- */
+
 var Storage_node = function(username, channel, dispatch) {
   this.username = username;
   this.dispatchEvents = dispatch;
@@ -56,7 +52,7 @@ Storage_node.prototype.set = function(key, value, continuation) {
         value: value
       });
     } else {
-      retValue = doc.value
+      retValue = doc.value;
       doc.value = value;
     }
     doc.save(function(err) {
