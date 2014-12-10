@@ -2,6 +2,9 @@
   "name": "radiatus",
   "version": "0.1.0",
   "description": "Node web server for freedom.js apps",
+  "bin": {
+    "radiatus": "app.js"
+  },
   "main": "app.js",
   "scripts": {
     "start": "node app.js node_modules/freedom/demo/counter/manifest.json -d",
