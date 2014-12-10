@@ -6,8 +6,8 @@ var Consumer = require("freedom/src/consumer");
 
 // Object exported on global => URL to source
 var DEPENDENCIES = {
-  io: "/radiatus/public/bower_components/cookies-js/dist/cookies.min.js",
-  Cookies: "/socket.io/socket.io.js",
+  Cookies: "/radiatus/public/bower_components/cookies-js/dist/cookies.min.js",
+  io: "/socket.io/socket.io.js",
   Promise: "/radiatus/public/bower_components/es6-promise-polyfill/promise.js"
 };
 
