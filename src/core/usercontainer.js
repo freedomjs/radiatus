@@ -61,7 +61,6 @@ UserContainer.prototype.addSocket = function(socket) {
               return false;
             }.bind({}, dispatchEvent));
           }
-          console.log(instance);
           return instance;
         }.bind({}, this._module));
       } else {
