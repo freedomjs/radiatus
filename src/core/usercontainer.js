@@ -52,7 +52,18 @@ UserContainer.prototype.addSocket = function(socket) {
         socket.emit("init", { type: "api", api: this._manifestJson.api[this._manifestJson.default] });
         p = new Provider(this._manifestJson.api[this._manifestJson.default], this.logger);
         p.onMessage('control', {channel: 'default', name: 'default', reverse: 'default'});
-        p.getInterface().providePromises(this._module);
+        p.getInterface().providePromises(function(module, dispatchEvent){
+          var args = Array.prototype.slice.call(arguments, 2);
+          var instance = module.apply({}, args);
+          if (instance.on) {
+            instance.on(function(dispatchEvent, tag, msg) {
+              dispatchEvent(tag, msg);
+              return false;
+            }.bind({}, dispatchEvent));
+          }
+          console.log(instance);
+          return instance;
+        }.bind({}, this._module));
       } else {
         // Force an eventInterface
         socket.emit("init", { type: "event" });
@@ -65,10 +76,12 @@ UserContainer.prototype.addSocket = function(socket) {
         proxy.on(function(instance, tag, data) {
           this.logger.debug("proxy: " + tag + "," + data);
           instance.emit(tag, data);
+          return false;
         }.bind(this, instance));
         instance.on(function(proxy, tag, data) {
           this.logger.debug("instance: " + tag + "," + data);
           proxy.emit(tag, data);
+          return false;
         }.bind(this, proxy));
       }
       p.on('default', function(socket, msg) {

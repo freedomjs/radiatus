@@ -53,7 +53,9 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
 
   // Create socket to the server
   var csrfToken = this._exports.Cookies.get('XSRF-TOKEN');
-  var socket = this._exports.io("/?csrf=" + csrfToken);
+  var socket = this._exports.io("/?csrf=" + csrfToken, {
+    reconnection: false
+  });
 
   // Get initialization information from the server
   socket.once("init", function(socket, resolve, reject, msg) {
@@ -89,6 +91,11 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
     if (this._DEBUG) { this._exports.radiatusSocket = socket; }
     if (this._DEBUG) { this._exports.radiatusConsumer = c; }
   }.bind(this, socket, resolve, reject));
+
+  // Listen for disconnection events
+  socket.on("disconnect", function(data) {
+    console.error("Disconnected from Radiatus server");
+  });
 
   // Send these parameters to the server to signal readiness
   socket.emit("init", {
