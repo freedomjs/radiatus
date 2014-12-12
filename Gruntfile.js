@@ -19,7 +19,7 @@ module.exports = function(grunt) {
     browserify: {
       options: { browserifyOptions: { debug: true } },
       client: {
-        files: { "build/freedom.js": [ "src/client/main.js" ] },
+        files: { "dist/freedom.js": [ "src/client/main.js" ] },
         options: {}
       }
     },

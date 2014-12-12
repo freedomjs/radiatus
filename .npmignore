@@ -2,7 +2,6 @@ keystore.db
 config/production.json
 
 build/
-dist/
 
 node_modules/
 public/bower_components/
