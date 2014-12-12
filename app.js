@@ -42,6 +42,7 @@ mongoose.connection.once('open', function(logger) {
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')
+  .script("radiatus")
   .option('debug', {
     abbr: 'd',
     flag: true,
