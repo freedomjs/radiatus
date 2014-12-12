@@ -1,9 +1,9 @@
 {
   "name": "radiatus",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node web server for freedom.js apps",
   "bin": {
-    "radiatus": "app.js"
+    "radiatus": "node app.js"
   },
   "main": "app.js",
   "scripts": {
