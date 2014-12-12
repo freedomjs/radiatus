@@ -2,6 +2,9 @@
  * Radiatus Entry
  **/
 
+// Currently looks for 'config/' in the cwd
+// Change to where the script resides
+process.env.NODE_CONFIG_DIR = __dirname + '/config'; 
 /** IMPORTS **/
 var path = require('path');
 var express = require('express');
