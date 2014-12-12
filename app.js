@@ -65,9 +65,7 @@ var opts = require('nomnom')
   .parse();
 
 /** SUBMODULES **/
-var processManager = require('./src/core/processmanager').initialize(
-  path.join(__dirname, opts.path)
-);
+var processManager = require('./src/core/processmanager').initialize(path.join(process.cwd(), opts.path));
 var authRouter = require('./src/routes/auth').router;
 var fileServer = require('./src/routes/fileserver').initialize(opts.path, opts.debug);
 var socketHandler = new require("./src/routes/socket").initialize(sessionStore);
