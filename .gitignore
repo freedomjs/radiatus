@@ -2,10 +2,9 @@ keystore.db
 config/production.json
 
 build/
-dist/
-
+public/dist/
 node_modules/
-public/bower_components/
+bower_components/
 
 .*.swp
 npm-debug.log

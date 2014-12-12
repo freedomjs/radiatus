@@ -19,8 +19,21 @@ module.exports = function(grunt) {
     browserify: {
       options: { browserifyOptions: { debug: true } },
       client: {
-        files: { "dist/freedom.js": [ "src/client/main.js" ] },
+        files: { "public/dist/freedom.js": [ "src/client/main.js" ] },
         options: {}
+      }
+    },
+    copy: {
+      client: {
+        src: [
+          "bower_components/foundation/css/foundation.css",
+          "bower_components/cookies-js/dist/cookies.min.js",
+          "bower_components/es6-promise-polyfill/promise.js",
+        ],
+        dest: "public/dist/",
+        expand: true, 
+        flatten: true,
+        filter: 'isFile'
       }
     },
     jshint: {
@@ -67,6 +80,7 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-browserify");
@@ -91,6 +105,7 @@ module.exports = function(grunt) {
   
   // Default tasks.
   grunt.registerTask("build", [
+    "copy:client",
     "browserify:client"
   ]);
   grunt.registerTask("test", [

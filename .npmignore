@@ -4,6 +4,7 @@ config/production.json
 build/
 
 node_modules/
+bower_components/
 
 .*.swp
 npm-debug.log
