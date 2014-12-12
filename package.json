@@ -1,13 +1,13 @@
 {
   "name": "radiatus",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Node web server for freedom.js apps",
   "bin": {
-    "radiatus": "node app.js"
+    "radiatus": "bin/cli.js"
   },
   "main": "app.js",
   "scripts": {
-    "start": "node app.js node_modules/freedom/demo/counter/manifest.json -d",
+    "start": "bin/cli.js node_modules/freedom/demo/counter/manifest.json -d",
     "debug": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
     "counter": "supervisor -- app.js node_modules/freedom/demo/counter/manifest.json -d",
     "tictak": "supervisor -- app.js node_modules/freedom/demo/tictak/manifest.json -d",
