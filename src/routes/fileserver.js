@@ -55,9 +55,16 @@ FileServer.prototype.serveModule = function(prefix, url) {
     if (manifest.app && manifest.app.script) { files = files.concat(manifest.app.script); }
     if (manifest.app && manifest.app.index) { files = files.concat(manifest.app.index); }
     if (manifest.views) {
-      manifest.views.keys().forEach(function(view) {
-        files = files.concat(manifest.views[view]);
-      });
+      for (var k in manifest.views) {
+        if (manifest.views.hasOwnProperty(k)) {
+          if (manifest.views[k].hasOwnProperty('main')) {
+            files.push(manifest.views[k].main);
+          } 
+          if (manifest.views[k].hasOwnProperty('files')) {
+            files = files.concat(manifest.views[k].files);
+          }
+        }
+      }
     }
     if (manifest.app.index && !this.index) {
       this.index = manifest.app.index;

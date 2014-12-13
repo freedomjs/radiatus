@@ -20,6 +20,18 @@ $ radiatus [freedom.js manifest] -d
 ## Develop
 See below for more information on how to write freedom.js applications.
 
+## Debug
+Start up a node-inspector server
+
+```bash
+$ npm install -g node-inspector
+node-inspector
+```
+
+Radiatus will spawn 1 process for the web server and 1 process for each (user, freedom.js module) tuple.
+For example, 2 users are logged in and your freedom.js application consists of 3 modules,
+then there will be 7 node.js processes.
+
 ## More information
 * [Academic Paper](http://www.cs.washington.edu/education/grad/UW-CSE-13-11-01.PDF)
 * [freedom.js](http://freedomjs.org)
