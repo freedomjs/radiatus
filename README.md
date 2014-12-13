@@ -21,16 +21,27 @@ $ radiatus [freedom.js manifest] -d
 See below for more information on how to write freedom.js applications.
 
 ## Debug
-Start up a node-inspector server
+Start up a node-inspector server on a specified port.
+The following commands allow you to access the developer console at
+http://127.0.0.1:8000/debug?port=5858
 
 ```bash
 $ npm install -g node-inspector
-node-inspector
+$ node-inspector --web-port=8000
+```
+
+Then run your Radiatus application in debug mode.
+The following command will setup the V8 debug port to be 5858
+for the web server. Each subsequent process / freedom.js module
+will open up debug ports on monotonically increasing port numbers from this.
+
+```bash
+$ node /usr/local/lib/node_modules/radiatus/app.js --debug=5858 [freedom.js manifest] -d
 ```
 
 Radiatus will spawn 1 process for the web server and 1 process for each (user, freedom.js module) tuple.
-For example, 2 users are logged in and your freedom.js application consists of 3 modules,
-then there will be 7 node.js processes.
+For example if 2 users are logged in and your freedom.js application consists of 3 modules,
+then there will be 7 node.js processes, with debug ports listening on [5858-5864]
 
 ## More information
 * [Academic Paper](http://www.cs.washington.edu/education/grad/UW-CSE-13-11-01.PDF)
