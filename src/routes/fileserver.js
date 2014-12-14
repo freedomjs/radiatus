@@ -4,9 +4,18 @@ var mime = require("mime");
 var express = require("express");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 
+path.removeRelativePrefix = function (url) {
+  while (url[0] === '.' || url[0] === '/') {
+    url = url.substr(1);
+  }
+  return url;
+};
 /** 
  * Serves files defined in a freedom.js manifest file and in all of its
- * dependencies
+ * dependencies. All files are served relative to the manifest.app.index.
+ * This means that the index page must be at the highest level in the file structure
+ * relative to other scripts and dependencies
+ * 
  * @constructor
  * @param {Boolean} dbg - turn on debugging
  **/
@@ -16,7 +25,8 @@ var FileServer = function(dbg) {
 
   this.files = {};
   this.manifests = {};
-  this.index = null;
+  this.indexFilename = null;
+  this.indexDirectory = null;
   this.debug = null;
   if (typeof dbg === 'undefined') {
     this.debug = false;
@@ -25,31 +35,43 @@ var FileServer = function(dbg) {
   }
 };
 
+
 /**
  * Read through a manifest and setup the file server
  * @method
- * @param {String} prefix - string prefix of where file is served from
  * @param {String} url - path to the manifest file
  **/
-FileServer.prototype.serveModule = function(prefix, url) {
+FileServer.prototype.serveModule = function(url) {
   "use strict";
-  function removeRelativePrefix(str) {
-    while(str[0] === '.' || 
-          str[0] === '/') {
-      str = str.substr(1);
-    }
-    return str;
-  }
 
   fs.readFile(url, function(err, file) {
+    // Error reading manifest file
     if (err) {
       throw err;
     }
-    var filename = path.basename(url);
-    var resolvedURL = path.join(prefix, filename);
+
+    // Parse the manifest
     var manifest = JSON.parse(file);
 
-    // map Scripts, Statics, Views
+    // File server needs a index page to serve. 
+    if (!this.indexFilename && (!manifest.app || !manifest.app.index)) {
+      logger.warn("No root manifest.app.index found: file server will not serve anything.");
+      return;
+    }
+    
+    // Determine where we are
+    var manifestAbsolutePath = path.resolve(url);
+    var manifestFilename = path.basename(url);
+    var manifestDirectory = path.dirname(manifestAbsolutePath);
+
+    // Only set the index with the root module (this method is recursive)
+    if (!this.indexFilename || !this.indexDirectory) {
+      this.indexFilename = path.basename(manifest.app.index);
+      this.indexDirectory = path.dirname(path.join(manifestDirectory, manifest.app.index));
+    }
+    this.manifests[path.relative(this.indexDirectory, manifestAbsolutePath)] = manifest;
+
+    // Find all the files in the manifest (e.g. scripts, statics, views)
     var files = [];
     if (manifest.app && manifest.app.static) { files = files.concat(manifest.app.static); }
     if (manifest.app && manifest.app.script) { files = files.concat(manifest.app.script); }
@@ -66,29 +88,29 @@ FileServer.prototype.serveModule = function(prefix, url) {
         }
       }
     }
-    if (manifest.app.index && !this.index) {
-      this.index = manifest.app.index;
-    }
 
+    // Map the file to the correct path relative to indexDirectory
     files.forEach(function(file) {
-      var resolvedFile = path.resolve(path.dirname(url), file);
-      var fileURL = path.join(prefix, file);
-      this.files[removeRelativePrefix(fileURL)] = resolvedFile;
+      var fileAbsPath = path.resolve(manifestDirectory, file);
+      var fileRelPath = path.relative(this.indexDirectory, fileAbsPath);
+      if (fileRelPath.indexOf("../") < 0) {
+        this.files[fileRelPath] = fileAbsPath;
+      } else {
+        fileRelPath = path.removeRelativePrefix(fileRelPath);
+        this.files[fileRelPath] = fileAbsPath;
+        logger.warn("Shifted relative path: " + fileRelPath + "=>" + fileAbsPath);
+      }
     }.bind(this));
 
-    // map dependencies
+    // Recurse with dependencies
     if (manifest.dependencies) {
       for (var dep in manifest.dependencies) {
         if (manifest.dependencies.hasOwnProperty(dep)) {
           var depURL = manifest.dependencies[dep].url;
-          var depPrefix = path.join(prefix, dep);
-          this.serveModule(depPrefix, path.resolve(path.dirname(url), depURL));
-          manifest.dependencies[dep].url =
-              path.join(depPrefix, path.basename(depURL));
+          this.serveModule(path.join(manifestDirectory, depURL));
         }
       }
     }
-    this.manifests[resolvedURL] = manifest;
 
   }.bind(this));
 };
@@ -108,12 +130,12 @@ FileServer.prototype.route = function(req, res, next) {
     req.url = req.url.substr(1);
   }
   // Check if grabbing index
-  if ((!req.url || req.url === '') && this.index) {
+  if ((!req.url || req.url === '') && this.indexFilename) {
     // Establish a CSRF Token for the session
     var token = req.csrfToken();
     req.session.customCSRF = token;
     res.cookie('XSRF-TOKEN', token);
-    req.url = this.index;
+    req.url = this.indexFilename;
   }
   
   if (this.files[req.url]) {
@@ -209,7 +231,7 @@ module.exports.initialize = function(manifest, debug) {
 
   router = express.Router();
   server = new FileServer(debug);
-  server.serveModule('./', manifest);
+  server.serveModule(manifest);
   router.get('*', server.ensureAuthenticated.bind(server), server.route.bind(server));
   module.exports.router = router;
   return router;
