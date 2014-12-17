@@ -5,6 +5,7 @@ var express = require("express");
 var logger = require("../core/logger").getLogger(path.basename(__filename));
 
 path.removeRelativePrefix = function (url) {
+  "use strict";
   while (url[0] === '.' || url[0] === '/') {
     url = url.substr(1);
   }
