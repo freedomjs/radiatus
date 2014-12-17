@@ -44,7 +44,7 @@
     "express": "^4.5.1",
     "express-session": "~1.7.2",
     "freedom": "0.6.11",
-    "freedom-for-node": "0.2.7",
+    "freedom-for-node": "0.2.8",
     "keygrip": "^1.0.1",
     "method-override": "~2.1.2",
     "mime": "^1.2.11",
