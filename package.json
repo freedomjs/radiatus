@@ -1,6 +1,6 @@
 {
   "name": "radiatus",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Node web server for freedom.js apps",
   "bin": {
     "radiatus": "bin/cli.js"
