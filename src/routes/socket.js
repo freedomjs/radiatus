@@ -15,8 +15,8 @@ var SocketHandler = function(sessionStore) {
   "use strict";
   logger.trace("constructor: enter");
   this._sessionStore = sessionStore;
-  this._cookieParser = cookieParser(config.get('sessionSecret'));
-  this._cookieKey = config.get('cookieKey');
+  this._cookieParser = cookieParser(config.get('webserver.sessionSecret'));
+  this._cookieKey = config.get('webserver.cookieKey');
 };
 
 /**

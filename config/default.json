@@ -1,16 +1,25 @@
 {
-  "sessionSecret": "secret key",
-  "cookieKey": "session",
-  "userDB": "mongodb://localhost:27017/radiatus",
-  "openRegistration": true,
-  "saltWorkFactor": 10,
-  "replaceDependency": {
-    "social": "node_modules/radiatus-providers/src/providers/social.radiatus.json"
+  "database": {
+    "url": "mongodb://localhost:27017/radiatus"
   },
-  "providerServers": [{
-    "url": "ws://localhost:8082",
-    "secret": "secret"
-  }],
+  "webserver": {
+    "url": "http://localhost:8080/",
+    "openRegistration": true,
+    "sessionSecret": "secret key",
+    "cookieKey": "session",
+    "saltWorkFactor": 10
+  },
+  "freedom": {
+    "replaceDependency": {
+      "social": "node_modules/radiatus-providers/src/providers/social.radiatus.json"
+    }
+  },
+  "provider": {
+    "servers": [{
+      "url": "ws://localhost:8082",
+      "secret": "secret"
+    }]
+  },
   "log": {
     "level": "trace",
     "levels": {

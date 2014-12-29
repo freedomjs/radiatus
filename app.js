@@ -27,12 +27,12 @@ var app = express();
 //var sessionStore = new session.MemoryStore();
 var MongoStore = require('connect-mongo')(session);
 var sessionStore = new MongoStore({
-  url: config.get('userDB')
+  url: config.get('database.url')
 }); 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var logger = require('./src/core/logger').getLogger(path.basename(__filename));
-mongoose.connect(config.get('userDB'));
+mongoose.connect(config.get('database.url'));
 mongoose.connection.on('error', function(logger, err) {
   "use strict";
   logger.error('Mongoose error:');
@@ -40,7 +40,7 @@ mongoose.connection.on('error', function(logger, err) {
 }.bind(this, logger));
 mongoose.connection.once('open', function(logger) {
   "use strict";
-  logger.info('Mongoose connection online to userDB');
+  logger.info('Mongoose connection online to database');
 }.bind(this, logger));
 
 /** OPTIONS PARSING **/
@@ -86,14 +86,14 @@ if (opts.debug) {
 app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
 
 /** SESSIONS/COOKIES **/
-app.use(cookieParser(config.get('sessionSecret')));
+app.use(cookieParser(config.get('webserver.sessionSecret')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
 app.use(session({
   store: sessionStore,
-  secret: config.get('sessionSecret'),
-  name: config.get('cookieKey'),
+  secret: config.get('webserver.sessionSecret'),
+  name: config.get('webserver.cookieKey'),
   resave: true,
   saveUninitialized: true
 }));
@@ -110,6 +110,11 @@ io.on('connection', socketHandler.onConnection.bind(socketHandler));
 app.use('/radiatus/auth', authRouter);
 // This serves static files from 'src/client/' (includes freedom.js)
 app.use('*/freedom.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use('*/freedom.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use('*/freedom-for-chrome.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use('*/freedom-for-chrome.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use('*/freedom-for-firefox.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use('*/freedom-for-firefox.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.all('/freedom/*', userRouter.route);

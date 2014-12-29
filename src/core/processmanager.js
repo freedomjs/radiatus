@@ -53,7 +53,7 @@ ProcessManager.prototype.getServiceUser = function(name) {
  **/
 ProcessManager.prototype.addSocket = function(username, socket) {
   "use strict";
-  logger.trace('addSocket: username=' + username);
+  logger.info('addSocket: username=' + username);
   var container = this.getOrCreateUser(username);
   container.addSocket(socket);
 };
