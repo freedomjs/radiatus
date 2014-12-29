@@ -27,6 +27,16 @@ var UserContainer = function(name, manifest) {
 };
 
 /**
+ * Get an array of all connected sockets to this user container
+ * @method
+ * @return {Array.<Socket>}
+ **/
+UserContainer.prototype.getSockets = function() {
+  "use strict";
+  return this._sockets;
+};
+
+/**
  * Handle an incoming socket from socket.io
  * @method
  * @param {socket} socket - new socket.io connection

@@ -10,13 +10,31 @@ var oAuthRedirectId = "freedom.oauth.redirect.handler";
  *   pop-up a new window or navigate away from the current page.
  * - We also allow the operator of the Radiatus web server
  *   to force the redirect URL to itself.
+ * @constructor
+ * @param {UserContainer} usercontainer - associated user container to current user
+ *   This is bound in src/core/usercontainer.js
  **/
 var RadiatusAuth = function(usercontainer) {
   "use strict";
-  this.redirectUri = config.get("webserver.url");
-  this.usercontainer = usercontainer;
+  this._redirectUri = config.get("webserver.url");
+  this._usercontainer = usercontainer;
+
+  this._continuations = {};
 };
 
+/**
+ * Indicate the intention to initiate an oAuth flow, allowing an appropriate
+ * oAuth provider to begin monitoring for redirection.
+ *
+ * @method initiateOAuth
+ * @param {string[]} redirectURIs - oAuth redirection URIs registered with the
+ *     provider.
+ * @param {Function} continuation - Function to call when complete
+ *    Expected to see a value of schema: {{redirect:String, state:String}}
+ *    where 'redirect' is the chosen redirect URI
+ *    and 'state' is the state to pass to the URI on completion of oAuth
+ * @return {Boolean} true if can handle, false otherwise
+ */
 RadiatusAuth.prototype.initiateOAuth = function(redirectURIs, continuation) {
   "use strict";
   var i;
@@ -25,7 +43,7 @@ RadiatusAuth.prototype.initiateOAuth = function(redirectURIs, continuation) {
         redirectURIs[i].indexOf('https://') === 0) {
       continuation({
         //redirect: redirectURIs[i],
-        redirect: this.redirectUri,
+        redirect: this._redirectUri,
         state: oAuthRedirectId + Math.random()
       });
       return true;
@@ -35,13 +53,26 @@ RadiatusAuth.prototype.initiateOAuth = function(redirectURIs, continuation) {
   return false;
 };
 
+/**
+ * oAuth client-side flow - launch the provided URL
+ * This must be called after initiateOAuth with the returned state object
+ *
+ * @method launchAuthFlow
+ * @param {String} authUrl - The URL that initiates the auth flow.
+ * @param {Object.<string, string>} stateObj - The return value from initiateOAuth
+ * @param {Function} continuation - Function to call when complete
+ *    Expected to see a String value that is the response Url containing the access token
+ */
 RadiatusAuth.prototype.launchAuthFlow = function(authUrl, stateObj, continuation) {
-  console.log(authUrl);
+  "use strict";
+  var i, sockets = this._usercontainer.getSockets();
+  var callback = function(data) {
+    console.log(data);
+  };
+  for (i=0; i<sockets.length; i++) {
+    sockets[i].emit("oauth", { authUrl: authUrl });
+  }
   //continuation(responseUrl);
 };
 
-/**
- * If we have access to chrome.identity, use the built-in support for oAuth flows
- * chrome.identity exposes a very similar interface to core.oauth.
- */
 module.exports = RadiatusAuth;

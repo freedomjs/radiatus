@@ -22,6 +22,7 @@ var Client = function(debug, exports) {
   this._DEBUG = debug;
   this._exports = exports;
   this._init();
+  this._socket = null;
 };
 
 /**
@@ -53,12 +54,12 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
 
   // Create socket to the server
   var csrfToken = this._exports.Cookies.get('XSRF-TOKEN');
-  var socket = this._exports.io("/?csrf=" + csrfToken, {
+  this._socket = this._exports.io("/?csrf=" + csrfToken, {
     reconnection: false
   });
 
   // Get initialization information from the server
-  socket.once("init", function(socket, resolve, reject, msg) {
+  this._socket.once("init", function(resolve, reject, msg) {
     if (this._DEBUG) { console.log("socket: init," + JSON.stringify(msg)); }
     var interfaceCls;
     // Choose what type of interface to create
@@ -77,28 +78,44 @@ Client.prototype.connect = function(manifest, options, resolve, reject, retries)
     // Wire up the consumer to the socket
     var c = new Consumer(interfaceCls, console);
     c.onMessage("control", { channel: "default", name: "default", reverse: "default" });
-    c.on("default", function(socket, msg) {
+    c.on("default", function(msg) {
       if (this._DEBUG) { console.log('consumer: default,' + JSON.stringify(msg)); }
-      socket.emit("default", msg);
-    }.bind(this, socket));
-    socket.on("default", function(c, msg) {
+      this._socket.emit("default", msg);
+    }.bind(this));
+    this._socket.on("default", function(c, msg) {
       if (this._DEBUG) { console.log('socket: default,' + JSON.stringify(msg)); }
       c.onMessage("default", msg);
     }.bind(this, c));
     resolve(c.getProxyInterface());
 
     // Debug
-    if (this._DEBUG) { this._exports.radiatusSocket = socket; }
+    if (this._DEBUG) { this._exports.radiatusSocket = this._socket; }
     if (this._DEBUG) { this._exports.radiatusConsumer = c; }
-  }.bind(this, socket, resolve, reject));
+  }.bind(this, resolve, reject));
 
+  /** OAUTH **/
+  // Redirect on command from the server
+  this._socket.on("oauth", function(data) {
+    if (this._DEBUG) { console.log("oAuth redirecting to " + JSON.stringify(data)); }
+    //this._exports.open(data.authUrl);
+    this._exports.location = data.authUrl;
+  }.bind(this));
+  if (this._exports.location && this._exports.location.hash &&
+      this._exports.location.hash.indexOf("access_token") >= 0) {
+    var responseUrl = this._exports.location.href;
+    this._exports.location.hash = "";
+    this._socket.emit("oauth", { responseUrl: responseUrl });
+    if (this._DEBUG) { console.log("Detected access_token, sending responseUrl " + responseUrl); }
+  }
+
+  /** DISCONNECTION **/
   // Listen for disconnection events
-  socket.on("disconnect", function(data) {
+  this._socket.on("disconnect", function(data) {
     console.error("Disconnected from Radiatus server");
   });
 
   // Send these parameters to the server to signal readiness
-  socket.emit("init", {
+  this._socket.emit("init", {
     manifest: manifest,
     options: options
   });
