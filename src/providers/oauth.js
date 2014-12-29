@@ -6,11 +6,6 @@ var oAuthRedirectId = "freedom.oauth.redirect.handler";
 
 /**
  * Custom oAuth provider for Radiatus web apps
- * The behavior is slightly different than most oAuth providers
- * - We have to signal to the client-side stub to either
- *   pop-up a new window or navigate away from the current page.
- * - We also allow the operator of the Radiatus web server
- *   to force the redirect URL to itself.
  * @constructor
  * @param {UserContainer} usercontainer - associated user container to current user
  *   This is bound in src/core/usercontainer.js
@@ -41,11 +36,9 @@ RadiatusAuth.prototype.initiateOAuth = function(redirectURIs, continuation) {
   "use strict";
   var i;
   for (i = 0; i < redirectURIs.length; i += 1) {
-    if (redirectURIs[i].indexOf('http://') === 0 ||
-        redirectURIs[i].indexOf('https://') === 0) {
+    if (redirectURIs[i].indexOf(this._redirectUri) === 0) {
       continuation({
-        //redirect: redirectURIs[i],
-        redirect: this._redirectUri,
+        redirect: redirectURIs[i],
         state: oAuthRedirectId + Math.random()
       });
       return true;
