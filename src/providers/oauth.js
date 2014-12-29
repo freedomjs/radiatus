@@ -1,6 +1,7 @@
 /*globals chrome,console */
 /*jslint indent:2,browser:true, node:true */
 var config = require("config");
+var querystring = require("querystring");
 var oAuthRedirectId = "freedom.oauth.redirect.handler";
 
 /**
@@ -20,6 +21,7 @@ var RadiatusAuth = function(usercontainer) {
   this._usercontainer = usercontainer;
 
   this._continuations = {};
+  this._setupListeners();
 };
 
 /**
@@ -66,13 +68,32 @@ RadiatusAuth.prototype.initiateOAuth = function(redirectURIs, continuation) {
 RadiatusAuth.prototype.launchAuthFlow = function(authUrl, stateObj, continuation) {
   "use strict";
   var i, sockets = this._usercontainer.getSockets();
-  var callback = function(data) {
-    console.log(data);
-  };
+  // Save the continuation, waiting for an oauth event back from the client
+  this._continuations[stateObj.state] = continuation;
+
+  // Someone try to open this URL, plz
   for (i=0; i<sockets.length; i++) {
     sockets[i].emit("oauth", { authUrl: authUrl });
   }
-  //continuation(responseUrl);
+};
+
+/**
+ * Setup proper event listeners
+ * @private
+ **/
+RadiatusAuth.prototype._setupListeners = function() {
+  "use strict";
+  this._usercontainer.on("socket", function(socket) {
+    socket.on("oauth", function(data) {
+      var hash = data.responseUrl.substr(data.responseUrl.indexOf('#')+1);
+      var parsed = querystring.parse(hash);
+      if (parsed.hasOwnProperty("state") &&
+          this._continuations.hasOwnProperty(parsed.state)) {
+        this._continuations[parsed.state](data.responseUrl);
+        delete this._continuations[parsed.state];
+      }
+    }.bind(this));
+  }.bind(this));
 };
 
 module.exports = RadiatusAuth;

@@ -1,8 +1,9 @@
 var path = require("path");
 var Q = require("q");
 var fs = require("fs");
+var events = require("events");
+var util = require("util");
 var freedom = require("freedom-for-node");
-var util = require("./util");
 var EventInterface = require("freedom/src/proxy/eventInterface");
 var Provider = require("freedom/src/provider");
 var Consumer = require("freedom/src/consumer");
@@ -18,6 +19,9 @@ var UserContainer = function(name, manifest) {
   this.logger = require("../core/logger").getLogger(path.basename(__filename) + ":" + name);
   this.logger.trace("constructor: enter");
 
+  if (!(this instanceof UserContainer)) { return new UserContainer(name, manifest); }
+  events.EventEmitter.call(this);
+
   this._name = name;
   this._manifest = manifest;
   this._sockets = [];
@@ -25,6 +29,7 @@ var UserContainer = function(name, manifest) {
   this._module = null; // this._module.close() / this._module.close(instance)
   this._initialize();
 };
+util.inherits(UserContainer, events.EventEmitter);
 
 /**
  * Get an array of all connected sockets to this user container
@@ -44,6 +49,7 @@ UserContainer.prototype.getSockets = function() {
 UserContainer.prototype.addSocket = function(socket) {
   "use strict";
   this.logger.trace("addSocket: enter");
+  this.emit("socket", socket);
   this._sockets.push(socket);
 
   // Remove the socket if the user has disconnected 
