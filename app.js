@@ -108,13 +108,8 @@ io.set('authorization', socketHandler.onAuthorization.bind(socketHandler));
 io.on('connection', socketHandler.onConnection.bind(socketHandler));
 // User authentication
 app.use('/radiatus/auth', authRouter);
-// This serves static files from 'src/client/' (includes freedom.js)
-app.use('*/freedom.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
-app.use('*/freedom.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
-app.use('*/freedom-for-chrome.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
-app.use('*/freedom-for-chrome.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
-app.use('*/freedom-for-firefox.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
-app.use('*/freedom-for-firefox.*.js', express.static(path.join(__dirname, '/public/dist/freedom.js')));
+// This regex detects any request for freedom[-for-*][.v*.*.*].js
+app.use(/.*\/freedom(-for-[a-z]*)?(\.v(\.)?[0-9]*\.[0-9]*\.[0-9]*)?\.js/, express.static(path.join(__dirname, '/public/dist/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.all('/freedom/*', userRouter.route);

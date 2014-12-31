@@ -65,7 +65,7 @@ RadiatusAuth.prototype.launchAuthFlow = function(authUrl, stateObj, continuation
   this._continuations[stateObj.state] = continuation;
 
   // Someone try to open this URL, plz
-  for (i=0; i<sockets.length; i++) {
+  for (i = 0; i < sockets.length; i++) {
     sockets[i].emit("oauth", { authUrl: authUrl });
   }
 };
