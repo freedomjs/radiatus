@@ -1,8 +1,9 @@
 var path = require("path");
 var Q = require("q");
 var fs = require("fs");
+var events = require("events");
+var util = require("util");
 var freedom = require("freedom-for-node");
-var util = require("./util");
 var EventInterface = require("freedom/src/proxy/eventInterface");
 var Provider = require("freedom/src/provider");
 var Consumer = require("freedom/src/consumer");
@@ -18,12 +19,26 @@ var UserContainer = function(name, manifest) {
   this.logger = require("../core/logger").getLogger(path.basename(__filename) + ":" + name);
   this.logger.trace("constructor: enter");
 
+  if (!(this instanceof UserContainer)) { return new UserContainer(name, manifest); }
+  events.EventEmitter.call(this);
+
   this._name = name;
   this._manifest = manifest;
   this._sockets = [];
   this._manifestJson = null;
   this._module = null; // this._module.close() / this._module.close(instance)
   this._initialize();
+};
+util.inherits(UserContainer, events.EventEmitter);
+
+/**
+ * Get an array of all connected sockets to this user container
+ * @method
+ * @return {Array.<Socket>}
+ **/
+UserContainer.prototype.getSockets = function() {
+  "use strict";
+  return this._sockets;
 };
 
 /**
@@ -34,7 +49,15 @@ var UserContainer = function(name, manifest) {
 UserContainer.prototype.addSocket = function(socket) {
   "use strict";
   this.logger.trace("addSocket: enter");
+  this.emit("socket", socket);
   this._sockets.push(socket);
+
+  // Remove the socket if the user has disconnected 
+  socket.on("disconnect", function(socket) {
+    var index = this._sockets.indexOf(socket);
+    if (index >= 0) { this._sockets.splice(index, 1); }
+    this.logger.info(this._name + ":disconnected");
+  }.bind(this, socket));
   
   // Make sure that the module exists
   this._initialize().then(function(socket) {
@@ -101,6 +124,7 @@ UserContainer.prototype.addSocket = function(socket) {
  * Initialize the user container.
  * Read and parse the JSON from the manifest and 
  * start the freedom.js module
+ * If the module is already loaded
  * @private
  * @return {Promise} - fulfills when freedom.js module is loaded
  **/
@@ -120,13 +144,14 @@ UserContainer.prototype._initialize = function() {
   if (this._module === null) {
     this.logger.trace("_initialize: Initializing freedom.js root module");
     freedom.freedom(this._manifest, {
+      oauth: [ require("../providers/oauth").bind({}, this) ]
     }).then(function(deferred, module) {
       this.logger.debug("_initialize: freedom.js module created");
       this._module = module;
       deferred.resolve();
     }.bind(this, deferred));
-    //register("core.storage", require("./coreproviders/storage.js").bind({}, username));
-    //register("core.websocket", require("./coreproviders/websocket.js").bind({}, username));
+    //register("core.storage", require("../providers/storage.js").bind({}, username));
+    //register("core.websocket", require("../providers/websocket.js").bind({}, username));
   } else {
     deferred.resolve();
   }
@@ -172,10 +197,6 @@ UserContainer.prototype._teardown = function() {
     fContext.emit(msg.label, newData);
   }.bind(this, username, fContext, userLogger));
 
-  socket.on("disconnect", function(username) {
-    this._handlers[username].setSocket(null);
-    logger.debug(username+":disconnected");
-  }.bind(this, username));
 
 function Handler(username) {
   "use strict";

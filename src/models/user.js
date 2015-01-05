@@ -23,7 +23,7 @@ userSchema.pre('save', function(next) {
   "use strict";
   logger.trace('userSchema.pre(save...: enter');
   if(!this.isModified('password')) { return next(); }
-  bcrypt.genSalt(config.get('saltWorkFactor'), function(err, salt) {
+  bcrypt.genSalt(config.get('webserver.saltWorkFactor'), function(err, salt) {
     if(err) { return next(err); }
     bcrypt.hash(this.password, salt, function(err, hash) {
       if(err) { return next(err); }
