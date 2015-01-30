@@ -13,6 +13,7 @@
 var gulp = require("gulp");
 var jshint = require("gulp-jshint");
 var jsdoc = require("gulp-jsdoc");
+var mocha = require("gulp-mocha");
 var through = require("through");
 var browserify = require("browserify");
 var source = require('vinyl-source-stream');
@@ -22,24 +23,23 @@ var sourcemaps = require('gulp-sourcemaps');
 var fs = require("fs-extra");
 var path = require("path");
 
-var copyToDist = function(filepath) {
-  "use strict";
-  var filename = path.basename(filepath);
-  fs.copy(
-    filepath, 
-    "./public/dist/" + filename, 
-    function(err) { if (err) { throw err; } }
-  );
-};
 gulp.task("copy_client_lib", function() {
   "use strict";
+  var copyToDist = function(filepath) {
+    fs.copy(
+      filepath, 
+      "./public/dist/" + path.basename(filepath), 
+      function(err) { if (err) { throw err; } }
+    );
+  };
   copyToDist("./bower_components/foundation/css/foundation.css");
   copyToDist("./bower_components/cookies-js/dist/cookies.min.js");
   copyToDist("./bower_components/es6-promise-polyfill/promise.js");
 });
 
-var browserifyTarget = function(entry) {
+gulp.task("build_freedom_stub", function() {
   "use strict";
+  var entry = "./src/client/freedom.js";
   var filename = path.basename(entry);
   var bundler = browserify({
     entries: [ entry ],
@@ -57,16 +57,11 @@ var browserifyTarget = function(entry) {
       .pipe(gulp.dest('./public/dist/'));
   };
   return bundle();
-};
-gulp.task("build_freedom_stub", function() {
-  "use strict";
-  browserifyTarget('./src/client/freedom.js');
-  return;
 });
 
 gulp.task("generate_jsdoc", function() {
   "use strict";
-  gulp.src("./src/**/*.js")
+  return gulp.src("./src/**/*.js")
     .pipe(jsdoc("./build/doc"));
 });
 
@@ -83,18 +78,9 @@ gulp.task("lint", function() {
 
 gulp.task("mocha_test", function() {
   "use strict";
-  /** 
-   * return gulp.src(testFiles)
-   *   .pipe(karma({
-   *     configFile: 'karma.conf.js',
-   *     action: 'run'
-   *   }))
-   *   .on('error', function(err) { 
-   *     throw err; 
-   *   });
-   **/
+  return gulp.src("./src/**/*.spec.js")
+    .pipe(mocha({ reporter: "spec" }));
 });
-
 
 gulp.task("build", [ "copy_client_lib", "build_freedom_stub" ]);
 gulp.task("test", [ "lint", "mocha_test" ]);
