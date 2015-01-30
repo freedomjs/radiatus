@@ -29,9 +29,9 @@ var MongoStore = require('connect-mongo')(session);
 var sessionStore = new MongoStore({
   url: config.get('database.url')
 }); 
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var logger = require('./src/core/logger').getLogger(path.basename(__filename));
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+var logger = require('./core/logger').getLogger(path.basename(__filename));
 mongoose.connect(config.get('database.url'));
 mongoose.connection.on('error', function(logger, err) {
   "use strict";
@@ -51,12 +51,6 @@ var opts = require('nomnom')
     flag: true,
     help: 'Print debugging info'
   })
-  .option('port', {
-    abbr: 'p',
-    help: 'listening port',
-    metavar: 'PORT',
-    default: 8080
-  })
   .option('path', {
     position: 0,
     help: 'Application to serve',
@@ -65,13 +59,13 @@ var opts = require('nomnom')
   .parse();
 
 /** SUBMODULES **/
-var processManager = require('./src/core/processmanager').initialize(path.join(process.cwd(), opts.path));
-var authRouter = require('./src/routes/auth').router;
-var fileServer = require('./src/routes/fileserver').initialize(opts.path, opts.debug);
-var socketHandler = new require("./src/routes/socket").initialize(sessionStore);
+var processManager = require('./core/processmanager').initialize(path.join(process.cwd(), opts.path));
+var authRouter = require('./routes/auth').router;
+var fileServer = require('./routes/fileserver').initialize(opts.path, opts.debug);
+var socketHandler = new require("./routes/socket").initialize(sessionStore);
 
 /** VIEW ENGINE **/
-app.set('views', path.join(__dirname, './views'));
+app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 app.engine('ejs', ejsLocals);
 
@@ -83,7 +77,7 @@ if (opts.debug) {
 }
 
 /** STATIC CONTENT **/
-app.use('/radiatus/public', express.static(path.join(__dirname, 'public')));
+app.use('/radiatus/public', express.static(path.join(__dirname, '../public')));
 
 /** SESSIONS/COOKIES **/
 app.use(cookieParser(config.get('webserver.sessionSecret')));
@@ -109,13 +103,9 @@ io.on('connection', socketHandler.onConnection.bind(socketHandler));
 // User authentication
 app.use('/radiatus/auth', authRouter);
 // This regex detects any request for freedom[-for-*][.v*.*.*].js
-app.use(/.*\/freedom(-for-[a-z]*)?(\.v(\.)?[0-9]*\.[0-9]*\.[0-9]*)?\.js/, express.static(path.join(__dirname, '/public/dist/freedom.js')));
+app.use(/.*\/freedom(-for-[a-z]*)?(\.v(\.)?[0-9]*\.[0-9]*\.[0-9]*)?\.js/, express.static(path.join(__dirname, '../public/dist/freedom.js')));
 // Serve files from the freedom.js dependency tree
 app.use('/', fileServer);
 //app.all('/freedom/*', userRouter.route);
 
-/** START 'ER UP**/
-http.listen(opts.port, function() {
-  "use strict";
-  logger.info("Radiatus is running on port " + opts.port);
-});
+module.exports = server;
