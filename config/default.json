@@ -4,6 +4,7 @@
   },
   "webserver": {
     "url": "http://localhost:8080/",
+    "port": 8080,
     "openRegistration": true,
     "sessionSecret": "secret key",
     "cookieKey": "session",
