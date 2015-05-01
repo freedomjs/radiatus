@@ -17,7 +17,6 @@ var session = require('express-session');
 var passport = require('passport');
 var csrf = require('csurf');
 var flash = require('connect-flash');
-var mongoose = require('mongoose');
 
 /** EXPRESS APPLICATION **/
 var config = require('config');
@@ -32,16 +31,6 @@ var sessionStore = new MongoStore({
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var logger = require('./core/logger').getLogger(path.basename(__filename));
-mongoose.connect(config.get('database.url'));
-mongoose.connection.on('error', function(logger, err) {
-  "use strict";
-  logger.error('Mongoose error:');
-  logger.error(err);
-}.bind(this, logger));
-mongoose.connection.once('open', function(logger) {
-  "use strict";
-  logger.info('Mongoose connection online to database');
-}.bind(this, logger));
 
 /** OPTIONS PARSING **/
 var opts = require('nomnom')

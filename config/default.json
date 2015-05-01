@@ -1,7 +1,4 @@
 {
-  "database": {
-    "url": "mongodb://localhost:27017/radiatus"
-  },
   "webserver": {
     "url": "http://localhost:8080/",
     "port": 8080,
