@@ -23,11 +23,7 @@ var config = require('config');
 var app = express();
 // For alternatives, see
 // https://github.com/senchalabs/connect/wiki
-//var sessionStore = new session.MemoryStore();
-var MongoStore = require('connect-mongo')(session);
-var sessionStore = new MongoStore({
-  url: config.get('database.url')
-}); 
+var sessionStore = new session.MemoryStore();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var logger = require('./core/logger').getLogger(path.basename(__filename));
