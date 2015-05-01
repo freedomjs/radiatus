@@ -150,8 +150,6 @@ UserContainer.prototype._initialize = function() {
       this._module = module;
       deferred.resolve();
     }.bind(this, deferred));
-    //register("core.storage", require("../providers/storage.js").bind({}, username));
-    //register("core.websocket", require("../providers/websocket.js").bind({}, username));
   } else {
     deferred.resolve();
   }
